@@ -33,6 +33,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameScreen extends ScreenAdapter {
 
     private PerspectiveCamera camera;
@@ -56,6 +59,8 @@ public class GameScreen extends ScreenAdapter {
     ModelBuilder modelBuilder = new ModelBuilder();
     ModelInstance test;
 
+    List<Bezier> beziers = new ArrayList<>();
+    List<ModelInstance> modelInstances = new ArrayList<>();
 
     public GameScreen(AssetManager assetManager) {
         this.assetManager = assetManager;
@@ -71,12 +76,16 @@ public class GameScreen extends ScreenAdapter {
         curveGenerator = new BezierGenerator();
         trackPiece = new TrackPiece(curveGenerator.generateTrack());
         track = trackPiece.getInstance();
+
+        setTestCurves();
+
         //mesh = trackPiece.generateMesh(20, 5, 3);
         modelBatch = new ModelBatch();
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
+        /*
         modelBuilder.begin();
         MeshPartBuilder meshBuilder;
         meshBuilder = modelBuilder.part("part1", GL20.GL_LINES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
@@ -88,7 +97,41 @@ public class GameScreen extends ScreenAdapter {
         //meshBuilder.sphere(5, 5, 5, 10, 10);
         SphereShapeBuilder.build(meshBuilder,5, 5, 5, 10, 10);
         test = new ModelInstance(modelBuilder.end());
+         */
 
+    }
+
+    private void setTestCurves() {
+        TrackPiece trackPiece = new TrackPiece(
+                new Bezier(
+                        new Vector3(0, -20, 0),
+                        new Vector3(0, 40, 50),
+                        new Vector3(50, 40, 100),
+                        new Vector3(100, -20, 100)
+                )
+        );
+
+        modelInstances.add(trackPiece.getInstance());
+
+        trackPiece = new TrackPiece(
+                new Bezier(
+                        new Vector3(100, -20, 100),
+                        new Vector3(150, -80, 100),
+                        new Vector3(200, -80, 150),
+                        new Vector3(250, -40, 200)
+                )
+        );
+        modelInstances.add(trackPiece.getInstance());
+
+        trackPiece = new TrackPiece(
+                new Bezier(
+                        new Vector3(250, -40, 200),
+                        new Vector3(300, 0, 250),
+                        new Vector3(250, 20, 250),
+                        new Vector3(250, 20, 350)
+                )
+        );
+        modelInstances.add(trackPiece.getInstance());
     }
 
     @Override
@@ -115,7 +158,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        fpsController.update(delta * 5f);
+        fpsController.update(delta * 20f);
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -124,10 +167,11 @@ public class GameScreen extends ScreenAdapter {
 
         modelBatch.begin(camera);
         //modelBatch.render(test, environment);
-        modelBatch.render(track, environment);
+        //modelBatch.render(track, environment);
+        for (ModelInstance instance : modelInstances){
+            modelBatch.render(instance, environment);
+        }
         modelBatch.end();
-
-
 
 
         shapeRenderer.setProjectionMatrix(camera.combined);

@@ -3,19 +3,16 @@ package net.madmenyo.beerunner;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Pools;
 
 public class TrackPiece {
 
@@ -30,6 +27,7 @@ public class TrackPiece {
     private int quadCount;
     private int vertCount;
     private int indexCount;
+    private int vertComponents = 6;
 
     private int index = 0;
     float[] verts;
@@ -44,7 +42,7 @@ public class TrackPiece {
     }
 
     public ModelInstance getInstance(){
-        generateMesh(100, 5, 3);
+        generateMeshOverFullCurve(100, 5, 3);
 
         Material mat = new Material(new ColorAttribute(ColorAttribute.Diffuse, Color.GRAY));
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -55,22 +53,37 @@ public class TrackPiece {
         return new ModelInstance(model);
     }
 
-    public Mesh generateMesh(int samples, float sectionSize, int quadStrips){
+    /**
+     * This generates a mesh from a curve. It iterates the curve by length using t and seems buggy
+     * with extreme curves
+     * @param samples
+     * @param sectionSize
+     * @param quadStrips
+     * @return
+     */
+    public Mesh generateMeshOverFullCurve(int samples, float sectionSize, int quadStrips){
 
         // Should probably store verts in list since I iteratre over curve differently
         sections = (int)(curve.approxLength(samples) / sectionSize);
+
+        System.out.println("Precalc results");
+        System.out.println("Length  : " + curve.approxLength(samples));
+        System.out.println("Sections: " + sections);
+
         quadCount = sections * quadStrips;
         // Each line has 4 verts
         vertCount = (sections + 1) * 4;
         indexCount = quadCount * 6;
 
         mesh = new Mesh(true, vertCount, indexCount,
-                new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position"));
-        verts = new float[vertCount * 3];
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position"),
+                new VertexAttribute(VertexAttributes.Usage.Normal, 3, "a_normal"));
+        verts = new float[vertCount * vertComponents];
 
         // float t should start at a offset of previous
         int n = 0;
-        for (float t = 0; t <= 1; ){
+        float l = 0;
+        for (float t = 0; t < 1; ){
             n++;
             // Set position and derivative at t
             curve.valueAt(position, t);
@@ -80,9 +93,18 @@ public class TrackPiece {
             float length = derivative.len();
             derivative.scl(1/ length);
 
-            // step t using section size
-            t += sectionSize / length;
+            l += length;
 
+            // step t using section size
+
+            t += sectionSize / length;
+            if (t > 1){
+                t = 1;
+                curve.valueAt(position, 1);
+                curve.derivativeAt(derivative, 1);
+            }
+
+            System.out.println(t);
             // set vertices of first step
             //for now hardcode for 3 quads 4 verts
 
@@ -99,11 +121,14 @@ public class TrackPiece {
             // now loop and use derivative and offset it each time by derivative
             // Possible to create a curvature over the width of the path by raising the outer verts
             for (int i = 0; i < 4; i++) {
-                addVert(position, derivative);
+                addVert(position, Vector3.Y);
                 position.add(tmp.set(derivative).scl(sectionSize));
             }
 
         }
+        System.out.println("Looping results");
+        System.out.println("Length: " + l);
+        System.out.println("Sections " + (n - 1));
         mesh.setVertices(verts);
 
         short[] indices = new short[indexCount];
@@ -151,19 +176,23 @@ public class TrackPiece {
     /**
      * Adds a vert to the mesh
      * @param position position of the vert
-     * @param derivative used to find normal?
+     * @param normal the normal of the vert
      */
-    private void addVert(Vector3 position, Vector3 derivative) {
-        if (index >= vertCount * 3) return;
+    private void addVert(Vector3 position, Vector3 normal) {
+        if (index >= vertCount * vertComponents) return;
         verts[index++] = position.x;
         verts[index++] = position.y;
         verts[index++] = position.z;
+
+        verts[index++] = normal.x;
+        verts[index++] = normal.y;
+        verts[index++] = normal.z;
     }
 
     public void drawVerts(ShapeRenderer shapeRenderer){
         shapeRenderer.setColor(Color.CYAN);
         float vertSize = .2f;
-        for (int i = 0; i < verts.length; i += 3) {
+        for (int i = 0; i < verts.length; i += vertComponents) {
 
             /*
             shapeRenderer.box(verts[i + 0] - vertSize / 2f, verts[i + 1] - vertSize / 2f, verts[i + 2] - vertSize / 2f,

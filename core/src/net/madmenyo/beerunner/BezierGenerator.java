@@ -22,10 +22,10 @@ public class BezierGenerator {
     public BezierGenerator() {
 
         // Create dummy arc curve points
-        points.add(new Vector3(0, -10, 0));
-        points.add(new Vector3(0, 10, 50));
-        points.add(new Vector3(50, 10, 100));
-        points.add(new Vector3(100, 15, 100));
+        points.add(new Vector3(0, -20, 0));
+        points.add(new Vector3(0, 40, 50));
+        points.add(new Vector3(50, 40, 100));
+        points.add(new Vector3(100, -20, 100));
     }
 
     public Bezier generateTrack() {
@@ -44,7 +44,7 @@ public class BezierGenerator {
         // set prev pos to start of curve
         previousPosition.set(curve.points.get(0));
 
-        for (int i = 0; i < 100; i++){
+        for (int i = 0; i <= 100; i++){
             curve.valueAt(position, i / 100f);
 
 
@@ -52,6 +52,7 @@ public class BezierGenerator {
             shapeRenderer.line(previousPosition.x, previousPosition.y, previousPosition.z,
                     position.x, position.y, position.z);
             previousPosition.set(position);
+            System.out.println(i);
 
         }
 
