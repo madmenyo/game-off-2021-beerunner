@@ -47,6 +47,7 @@ public class GameScreen extends ScreenAdapter {
     private ShapeRenderer shapeRenderer;
 
     private BezierGenerator curveGenerator;
+    private StraightCurveGenerator straightCurveGenerator;
     private TrackPiece trackPiece;
 
     private AssetManager assetManager;
@@ -74,6 +75,7 @@ public class GameScreen extends ScreenAdapter {
 
 
         curveGenerator = new BezierGenerator();
+        straightCurveGenerator = new StraightCurveGenerator();
         trackPiece = new TrackPiece(curveGenerator.generateTrack());
         track = trackPiece.getInstance();
 
@@ -102,6 +104,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void setTestCurves() {
+        /*
         TrackPiece trackPiece = new TrackPiece(
                 new Bezier(
                         new Vector3(0, -20, 0),
@@ -132,6 +135,13 @@ public class GameScreen extends ScreenAdapter {
                 )
         );
         modelInstances.add(trackPiece.getInstance());
+
+         */
+
+        for (int i = 0; i < 10; i++) {
+            TrackPiece t = new TrackPiece(straightCurveGenerator.getCurve());
+            modelInstances.add(t.getInstance());
+        }
     }
 
     @Override
