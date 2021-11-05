@@ -85,10 +85,15 @@ public class TrackPiece {
 
             // set vertices of first step
             //for now hardcode for 3 quads 4 verts
+
+            // should flatten out derivative horizontally
+            derivative.y = 0;
+            derivative.nor();
+
             derivative.rotate(Vector3.Y, 90);
             // since the path is centered we should offset 1,5
-
             position.add(tmp.set(derivative).scl(sectionSize * 1.5f));
+
             derivative.rotate(Vector3.Y, 180);
 
             // now loop and use derivative and offset it each time by derivative
@@ -149,6 +154,7 @@ public class TrackPiece {
      * @param derivative used to find normal?
      */
     private void addVert(Vector3 position, Vector3 derivative) {
+        if (index >= vertCount * 3) return;
         verts[index++] = position.x;
         verts[index++] = position.y;
         verts[index++] = position.z;

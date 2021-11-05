@@ -22,10 +22,10 @@ public class BezierGenerator {
     public BezierGenerator() {
 
         // Create dummy arc curve points
-        points.add(new Vector3(0, 0, 0));
-        points.add(new Vector3(0, 0, 50));
-        points.add(new Vector3(50, 0, 100));
-        points.add(new Vector3(100, 0, 100));
+        points.add(new Vector3(0, -10, 0));
+        points.add(new Vector3(0, 10, 50));
+        points.add(new Vector3(50, 10, 100));
+        points.add(new Vector3(100, 15, 100));
     }
 
     public Bezier generateTrack() {
