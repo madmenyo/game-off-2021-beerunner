@@ -1,6 +1,7 @@
 package net.madmenyo.beerunner;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
+import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.ConeShapeBuilder;
@@ -26,6 +28,7 @@ import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -35,7 +38,7 @@ public class GameScreen extends ScreenAdapter {
     private PerspectiveCamera camera;
     private Viewport viewport;
 
-    private CameraInputController cameraInputController;
+    private FirstPersonCameraController fpsController;
 
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
@@ -92,7 +95,8 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         setCamera();
 
-        Gdx.input.setInputProcessor(cameraInputController);
+        InputMultiplexer im = new InputMultiplexer(fpsController);
+        Gdx.input.setInputProcessor(im);
     }
 
     private void setCamera() {
@@ -102,14 +106,16 @@ public class GameScreen extends ScreenAdapter {
         camera.near = .1f;
         camera.far = 600;
 
-        cameraInputController = new CameraInputController(camera);
+        camera.up.set(Vector3.Y);
+
+        fpsController = new FirstPersonCameraController(camera);
 
         camera.update();
     }
 
     @Override
     public void render(float delta) {
-        cameraInputController.update();
+        fpsController.update(delta * 5f);
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
