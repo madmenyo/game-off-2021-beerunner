@@ -52,7 +52,6 @@ public class BezierGenerator {
             shapeRenderer.line(previousPosition.x, previousPosition.y, previousPosition.z,
                     position.x, position.y, position.z);
             previousPosition.set(position);
-            System.out.println(i);
 
         }
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 /**
  * This generator creates a curve that always has it's controll points fixed in x direction on the
@@ -16,6 +17,12 @@ public class StraightCurveGenerator {
     Vector3 lastControl = new Vector3(0, 0, -50);
 
     List<Vector3> points = new ArrayList<>();
+
+    List<Bezier> curves = new ArrayList<>();
+
+    List<Bezier> pastCurves = new ArrayList<>();
+
+
 
 
     public Bezier<Vector3> getCurve(){
@@ -44,5 +51,16 @@ public class StraightCurveGenerator {
         lastControl.set(endControl);
 
         return new Bezier<>(points.get(0).cpy(), points.get(1).cpy(), points.get(2).cpy(), points.get(3).cpy());
+    }
+
+    public Bezier<Vector3> nextCurve() {
+        if (!curves.isEmpty()){
+            pastCurves.add(curves.remove(0));
+
+        }
+
+        curves.add(getCurve());
+        return curves.get(0);
+
     }
 }
