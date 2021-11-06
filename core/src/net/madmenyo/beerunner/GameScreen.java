@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -26,9 +26,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class GameScreen extends ScreenAdapter {
 
     private PerspectiveCamera camera;
@@ -38,25 +35,14 @@ public class GameScreen extends ScreenAdapter {
 
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
-
-    private Player player;
-
-    private BezierGenerator curveGenerator;
-    private StraightCurveGenerator straightCurveGenerator;
-    private TrackPiece trackPiece;
-
-    private AssetManager assetManager;
-
     private Environment environment;
     private ModelBatch modelBatch;
 
-    private ModelInstance track;
+    private AssetManager assetManager;
 
-    ModelBuilder modelBuilder = new ModelBuilder();
-    ModelInstance test;
-
-    List<Bezier> beziers = new ArrayList<>();
-    List<ModelInstance> modelInstances = new ArrayList<>();
+    // Tests, might need refactoring
+    TrackGenerator trackGenerator;
+    Player player;
 
     public GameScreen(AssetManager assetManager) {
         this.assetManager = assetManager;
@@ -68,86 +54,21 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
 
-
-
-
-        curveGenerator = new BezierGenerator();
-        straightCurveGenerator = new StraightCurveGenerator();
-        trackPiece = new TrackPiece(curveGenerator.generateTrack());
-        track = trackPiece.getInstance();
-
-        setTestCurves();
-
-        //mesh = trackPiece.generateMesh(20, 5, 3);
-        modelBatch = new ModelBatch();
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+        modelBatch = new ModelBatch();
 
+        trackGenerator = new TrackGenerator();
 
+        ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
         MeshPartBuilder meshBuilder;
-        Node node = modelBuilder.node();
-        node.translation.set(0, 0.75f , 0f);
-        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES,
-                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
-
-        SphereShapeBuilder.build(meshBuilder, 2, 1.5f, 2f, 16, 12);
-        /*
-        //meshBuilder.cone(5, 5, 5, 10);
-        node = modelBuilder.node();
-        node.translation.set(10,0,0);
-        meshBuilder = modelBuilder.part("part2", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
-        //meshBuilder.sphere(5, 5, 5, 10, 10);
-        SphereShapeBuilder.build(meshBuilder,2, 2, 2, 10, 10);
-         */
-        //test = new ModelInstance(modelBuilder.end());
-
-        player = new Player(new ModelInstance(modelBuilder.end()), straightCurveGenerator);
-        //player = new Player(new ModelInstance(modelLoader.loadModel(Gdx.files.internal(""))));
+        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
+        SphereShapeBuilder.build(meshBuilder, 2, 1, 2, 16, 12);
+        player = new Player(new ModelInstance(modelBuilder.end()), trackGenerator);
     }
 
-    private void setTestCurves() {
-        /*
-        TrackPiece trackPiece = new TrackPiece(
-                new Bezier(
-                        new Vector3(0, -20, 0),
-                        new Vector3(0, 40, 50),
-                        new Vector3(50, 40, 100),
-                        new Vector3(100, -20, 100)
-                )
-        );
-
-        modelInstances.add(trackPiece.getInstance());
-
-        trackPiece = new TrackPiece(
-                new Bezier(
-                        new Vector3(100, -20, 100),
-                        new Vector3(150, -80, 100),
-                        new Vector3(200, -80, 150),
-                        new Vector3(250, -40, 200)
-                )
-        );
-        modelInstances.add(trackPiece.getInstance());
-
-        trackPiece = new TrackPiece(
-                new Bezier(
-                        new Vector3(250, -40, 200),
-                        new Vector3(300, 0, 250),
-                        new Vector3(250, 20, 250),
-                        new Vector3(250, 20, 350)
-                )
-        );
-        modelInstances.add(trackPiece.getInstance());
-
-         */
-
-        /*
-        for (int i = 0; i < 10; i++) {
-            TrackPiece t = new TrackPiece(straightCurveGenerator.getCurve());
-            modelInstances.add(t.getInstance());
-        }*/
-    }
 
     @Override
     public void show() {
@@ -180,26 +101,27 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         spriteBatch.setProjectionMatrix(camera.combined);
+        spriteBatch.begin();
+
+        spriteBatch.end();
 
         modelBatch.begin(camera);
-        //modelBatch.render(test, environment);
-        //modelBatch.render(track, environment);
-        for (ModelInstance instance : modelInstances){
-            modelBatch.render(instance, environment);
-        }
         modelBatch.render(player.getModelInstance(), environment);
         modelBatch.end();
 
-
         shapeRenderer.setProjectionMatrix(camera.combined);
-
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        //trackPiece.drawVerts(shapeRenderer);
 
-        player.drawCurve(shapeRenderer);
-        //curveGenerator.drawCurve(curveGenerator.generateTrack(), 5, shapeRenderer);
-
+        // Debug drawing
+        trackGenerator.getCurrentTrackSection().drawCurve(shapeRenderer);
+        for (TrackSection ts : trackGenerator.getPreviousSections())
+        {
+            ts.drawCurve(shapeRenderer);
+        }
+        /*
+        for (Vector3 p : trackGenerator.getCurrentTrackSection().dividePoints(10)){
+            drawBox(p, 1);
+        }*/
         shapeRenderer.end();
 
     }
@@ -207,6 +129,10 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
+    }
+
+    private void drawBox (Vector3 point, float size){
+        shapeRenderer.box(point.x - size / 2f, point.y - size / 2f, point.z + size / 2f, size, size, size);
     }
 
 }

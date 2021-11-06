@@ -1,66 +1,120 @@
 package net.madmenyo.beerunner;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 
-public class TrackPiece {
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Tracksection maps the curve to the mesh and holds other data like sides and obstacles.
+ */
+public class TrackSection implements Disposable {
     private Bezier<Vector3> curve;
+    float curveLength;
 
-    // previous curve to line it up, since we use world steps each mesh comes a little short
-    private Bezier<Vector3> previousCurve;
 
-    private Mesh mesh;
+    private ModelInstance track;
 
-    private int sections;
-    private int quadCount;
-    private int vertCount;
-    private int indexCount;
-    private int vertComponents = 6;
+    private Array<ModelInstance> sideObjects = new Array<>();
 
-    private int index = 0;
-    float[] verts;
+    Vector3 position = new Vector3();
+    Vector3 derivative = new Vector3();
 
-    private Vector3 position = new Vector3();
-    private Vector3 derivative = new Vector3();
-    private Vector3 tmp = new Vector3();
-
-    public TrackPiece(Bezier<Vector3> curve) {
+    public TrackSection(Bezier<Vector3> curve) {
         this.curve = curve;
+        curveLength = curve.approxLength(100);
 
-    }
-
-    public ModelInstance getInstance(){
-        generateMeshOverFullCurve(100, 5, 3);
-
-        Material mat = new Material(new ColorAttribute(ColorAttribute.Diffuse, Color.GRAY));
-        ModelBuilder modelBuilder = new ModelBuilder();
-        modelBuilder.begin();
-        modelBuilder.part("track", mesh, GL20.GL_TRIANGLES, mat);
-        Model model = modelBuilder.end();
-
-        return new ModelInstance(model);
     }
 
     /**
-     * This generates a mesh from a curve. It iterates the curve by length using t and seems buggy
-     * with extreme curves
-     * @param samples
-     * @param sectionSize
-     * @param quadStrips
+     * Divides points over track, this needs tweaking since end point is not reached.
+     * Should either push last point to end or do a second pass to even things out.
+     * @param amount
      * @return
      */
+    public List<Vector3> dividePoints(int amount){
+        List<Vector3> points = new ArrayList<>();
+
+        float stepDistance = curveLength / (float) amount;
+
+        for (float t = 0f; t <= 1f; ){
+            curve.valueAt(position, t);
+            curve.derivativeAt(derivative, t);
+
+            float len = derivative.len();
+
+            derivative.scl(1/ len);
+
+            t += stepDistance / len;
+
+
+            points.add(position.cpy());
+        }
+
+        return points;
+    }
+
+    /**
+     * Gets position on curve based on travel distance and current t
+     * @param t the current position on the curve (0...1)
+     * @param distance the distance in world units needed to travel
+     * @param out
+     * @return the calculated t on the current curve (0...1) if > 1 need new track and calculate
+     * distance left
+     */
+    public float getNextPosition(float t, float distance, Vector3 out){
+        curve.derivativeAt(derivative, t);
+        float len = derivative.len();
+
+        t += distance / len;
+
+        // If t has not reached end continue
+        if (t <= 1 ){
+            curve.valueAt(out, t);
+            return t;
+        }
+        // Otherwise return the distance traveled
+        curve.valueAt(out, 1);
+
+
+        return t;
+    }
+
+    /**
+     * Draws the curve of this track
+      * @param shapeRenderer
+     */
+    public void drawCurve(ShapeRenderer shapeRenderer){
+
+        curve.valueAt(position, 0);
+        for (int i = 1; i <= 100; i++) {
+
+            float t = i / 100f;
+            curve.valueAt(derivative, t);
+
+            shapeRenderer.line(position.x, position.y, position.z, derivative.x, derivative.y, derivative.z);
+
+            position.set(derivative);
+        }
+    }
+
+    public Bezier<Vector3> getCurve() {
+        return curve;
+    }
+
+    @Override
+    public void dispose() {
+        track.model.dispose();
+    }
+
+
+    // Somewhat hacky try out of creating a mesh, contains bugs using for reference
+    /*
     public Mesh generateMeshOverFullCurve(int samples, float sectionSize, int quadStrips){
 
         // Should probably store verts in list since I iteratre over curve differently
@@ -172,12 +226,6 @@ public class TrackPiece {
     }
 
 
-
-    /**
-     * Adds a vert to the mesh
-     * @param position position of the vert
-     * @param normal the normal of the vert
-     */
     private void addVert(Vector3 position, Vector3 normal) {
         if (index >= vertCount * vertComponents) return;
         verts[index++] = position.x;
@@ -194,13 +242,13 @@ public class TrackPiece {
         float vertSize = .2f;
         for (int i = 0; i < verts.length; i += vertComponents) {
 
-            /*
-            shapeRenderer.box(verts[i + 0] - vertSize / 2f, verts[i + 1] - vertSize / 2f, verts[i + 2] - vertSize / 2f,
-                    vertSize, vertSize, vertSize);
 
-             */
+            //shapeRenderer.box(verts[i + 0] - vertSize / 2f, verts[i + 1] - vertSize / 2f, verts[i + 2] - vertSize / 2f,
+            //        vertSize, vertSize, vertSize);
+
             shapeRenderer.box(verts[i + 0] - vertSize / 2f, verts[i + 1] - vertSize / 2f, verts[i + 2] + vertSize / 2f,
                     vertSize, vertSize, vertSize);
         }
     }
+     */
 }

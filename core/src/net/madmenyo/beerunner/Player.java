@@ -1,84 +1,97 @@
 package net.madmenyo.beerunner;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Bezier;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
 public class Player {
-
     private ModelInstance modelInstance;
     private Vector3 position = new Vector3();
+    private Vector3 derivative = new Vector3();
     private Quaternion quaternion = new Quaternion();
 
     /** Just a score keeper **/
     private float totalDistance;
 
-    private Bezier<Vector3> currentCurve;
-    private float curveLength;
-
-    private float distanceOnCurve;
-
-    private StraightCurveGenerator curveGenerator;
+    private TrackGenerator trackGenerator;
 
 
     private float speed = 50;
 
+
+    private float t = 0;
+
     /** Height offset from curve **/
-    private float height;
+    private float height = 1;
     /** Horizontal offset from curve **/
-    private float offset;
+    private float offset = 3;
 
-    public Player(ModelInstance modelInstance, StraightCurveGenerator curveGenerator) {
+    public Player(ModelInstance modelInstance, TrackGenerator trackGenerator) {
         this.modelInstance = modelInstance;
-        this.curveGenerator = curveGenerator;
-
-
-        nextCurve();
-
-    }
-
-    private void nextCurve() {
-        currentCurve = curveGenerator.nextCurve();
-        distanceOnCurve = 0;
-        curveLength = currentCurve.approxLength(100);
+        this.trackGenerator = trackGenerator;
 
     }
 
     public void update(float delta){
+        controlls(delta);
+        movement(delta);
+    }
 
-        // Calculate the distance we need to travel;
+    /**
+     * Moves based on current T on track. It asks the track generator for a position, the track
+     * generator is responsible for providing a new track and returning a proper T and position
+     * @param delta
+     */
+    private void movement(float delta) {
         float distanceToTravel = speed * delta;
-        distanceOnCurve += distanceToTravel;
+        // increment total distance for score keeping
+        totalDistance += distanceToTravel;
 
-        System.out.println("distance to travel: " + distanceToTravel);
-
-        if (distanceOnCurve >= curveLength){
-            distanceOnCurve -= curveLength;
-            nextCurve();
+        t = trackGenerator.getCurrentTrackSection().getNextPosition(t, distanceToTravel, position);
+        if (t > 1) // we need a new track
+        {
+            trackGenerator.nextTrack();
+            t -= 1;
         }
 
-        float t = distanceOnCurve / curveLength;
+        // Get derivative and offset
+        trackGenerator.getCurrentTrackSection().getCurve().derivativeAt(derivative, t);
 
-        System.out.println("T: " + t);
+        derivative.nor();
+        derivative.y = 0;
+        derivative.rotate(Vector3.Y, -90);
 
-
-        currentCurve.valueAt(position, t);
-
-
-        System.out.println("Pos: " + position);
+        // Set the position
         modelInstance.transform.set(position, quaternion);
 
+        // Translate position to current offsets
+        modelInstance.transform.translate(derivative.scl(offset));
+        modelInstance.transform.translate(0, height, 0);
+    }
+
+    /**
+     * Crude controls, should clamp offset to track width
+     * @param delta
+     */
+    private void controlls(float delta) {
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+            offset -= 5 * delta;
+
+        } else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            offset += 5 * delta;
+        }
+        MathUtils.clamp(offset, -5, 5);
     }
 
     public ModelInstance getModelInstance() {
         return modelInstance;
     }
 
+    /*
     public void drawCurve(ShapeRenderer shapeRenderer){
-
 
         Vector3 prev = new Vector3();
 
@@ -99,5 +112,5 @@ public class Player {
             prev.set(cur);
 
         }
-    }
+    }*/
 }

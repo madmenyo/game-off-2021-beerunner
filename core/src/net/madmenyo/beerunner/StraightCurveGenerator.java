@@ -6,10 +6,9 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
 
 /**
- * This generator creates a curve that always has it's controll points fixed in x direction on the
+ * This generator creates a curve that always has it's control points fixed in x direction on the
  * start and end point.
  */
 public class StraightCurveGenerator {
