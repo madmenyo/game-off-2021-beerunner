@@ -54,7 +54,9 @@ public class Player {
         if (t > 1) // we need a new track
         {
             trackGenerator.nextTrack();
+            // Can I get away with this? If each track is about the same length I probably can.
             t -= 1;
+            // Otherwise need to distill the left over distance and calculate it on the new track
         }
 
         // Get derivative and offset
