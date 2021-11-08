@@ -11,7 +11,7 @@ import java.util.List;
  * This generator creates a curve that always has it's control points fixed in x direction on the
  * start and end point.
  */
-public class StraightCurveGenerator implements ICurveGenerator {
+public class SimpleCurveGenerator implements ICurveGenerator {
     Vector3 lastPoint = new Vector3();
     Vector3 lastControl = new Vector3(0, 0, -50);
 

@@ -118,10 +118,11 @@ public class GameScreen extends ScreenAdapter {
         {
             ts.drawCurve(shapeRenderer);
         }
-        /*
-        for (Vector3 p : trackGenerator.getCurrentTrackSection().dividePoints(10)){
+
+        // Division of curves
+        for (Vector3 p : trackGenerator.getCurrentTrackSection().dividePoints(20)){
             drawBox(p, 1);
-        }*/
+        }
         shapeRenderer.end();
 
     }

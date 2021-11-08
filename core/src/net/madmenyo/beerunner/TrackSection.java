@@ -1,5 +1,6 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
@@ -113,11 +114,12 @@ public class TrackSection implements Disposable {
     }
 
 
-    // Somewhat hacky try out of creating a mesh, contains bugs using for reference
     /*
+    // Somewhat hacky try out of creating a mesh, contains bugs using for reference
+
     public Mesh generateMeshOverFullCurve(int samples, float sectionSize, int quadStrips){
 
-        // Should probably store verts in list since I iteratre over curve differently
+        // Should probably store verts in list since I iterate over curve differently
         sections = (int)(curve.approxLength(samples) / sectionSize);
 
         System.out.println("Precalc results");
@@ -250,5 +252,6 @@ public class TrackSection implements Disposable {
                     vertSize, vertSize, vertSize);
         }
     }
+
      */
 }
