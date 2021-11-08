@@ -93,7 +93,7 @@ public class TrackSection implements Disposable {
 
             float distance = i * stepDistance;
 
-            points.add(closestPositionOnLookupTable(distance).cpy());
+            points.add(findPosition(distance).cpy());
             //points.add(curve.valueAt(tmp1, curveLookUp.get(distance)));
 
         }
@@ -142,12 +142,20 @@ public class TrackSection implements Disposable {
     }
 
     /**
-     * Returns the closest distance on the table as t
+     * Returns the closest distance on the lookup table as position (V3)
      * @param distance
      * @return
      */
-    private Vector3 closestPositionOnLookupTable(float distance) {
+    private Vector3 findPosition(float distance) {
+        return curve.valueAt(tmp1, findT(distance));
+    }
 
+    /**
+     * Returns the closest distance on the lookup table as t 0...1
+     * @param distance
+     * @return
+     */
+    private float findT(float distance){
         float difference = Float.MAX_VALUE;
         for (Map.Entry<Float, Float> e : curveLookUp.entrySet()){
             float currentDiference = Math.abs(distance - e.getKey());
@@ -155,11 +163,12 @@ public class TrackSection implements Disposable {
                 difference = currentDiference;
             }
             else {
-                return curve.valueAt(tmp1, curveLookUp.get(e.getKey()));
+                return curveLookUp.get(e.getKey());
             }
         }
 
-        return curve.valueAt(tmp1, 1);
+        return 1f;
+
     }
 
     /**
@@ -213,6 +222,47 @@ public class TrackSection implements Disposable {
     @Override
     public void dispose() {
         track.model.dispose();
+    }
+
+    private void generateMesh(float sectionDistance){
+        // This might need to be variable based on curve length
+        final int sections = (int)(curveLength / sectionDistance);
+
+        // knowing the sections I know the vert count
+        final int quadCount = sections * 3;
+        // Sharing quads? each section line had 4 verts, also has aditional end line at t = 1.
+        final int vertCount = (sections + 1) * 4;
+        final int indiceCount = quadCount * 6;
+        final int attributes = 8;
+
+        Mesh mesh = new Mesh(true, vertCount, indiceCount,
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, "u_position"),
+                new VertexAttribute(VertexAttributes.Usage.Normal, 3, "u_normal"),
+                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "u_texture"));
+
+        // Generare verts
+        float[] verts = new float[vertCount * attributes];
+        for (int i = 0; i <= sections; i++) {
+            position.set(findPosition(i * sectionDistance));
+            float t = findT(i * sectionDistance);
+
+            //   For each section line
+            // Add vert positions
+
+
+            // Add normal direction
+            // Use derivative or other verts to calculate smoother normal. Problem is, track does
+            // not know anything about other curves but extrapolating start/end should be close
+
+
+            // Add UV
+            // Depending on width and section distance add UV. Probably use larger section distance
+            // to add a bit more texture detail at the cost of some geometry.
+
+
+        }
+
+        // Create model from mesh and add it to the track instance.
     }
 
     /*
