@@ -1,6 +1,5 @@
 package net.madmenyo.beerunner;
 
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
@@ -10,6 +9,9 @@ import com.badlogic.gdx.utils.Disposable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Tracksection maps the curve to the mesh and holds other data like sides and obstacles.
@@ -26,11 +28,32 @@ public class TrackSection implements Disposable {
     Vector3 position = new Vector3();
     Vector3 derivative = new Vector3();
 
-    Vector3 tmp = new Vector3();
+    Vector3 tmp1 = new Vector3();
+    Vector3 tmp2 = new Vector3();
+
+    /** map distance -> t **/
+    private SortedMap<Float, Float> curveLookUp = new TreeMap<>();
 
     public TrackSection(Bezier<Vector3> curve) {
         this.curve = curve;
-        curveLength = curve.approxLength(100);
+        curveLength = curve.approxLength(500);
+
+        curveLookUp.put(0f, 0f);
+
+
+        // Generate lookup
+        curve.valueAt(tmp2, 0f);
+        float dst = 0;
+        for (float t = 0f; t < 1f; ){
+            // Map detail
+            t += 1f / 500;
+            if (t > 1f) t = 1f;
+            curve.valueAt(tmp1, t);
+            dst += tmp1.dst(tmp2);
+            curveLookUp.put(dst, t);
+
+            tmp2.set(tmp1);
+        }
 
     }
 
@@ -40,7 +63,29 @@ public class TrackSection implements Disposable {
      * @param amount
      * @return
      */
-    public List<Vector3> dividePoints(int amount){
+    public List<Vector3> divideByLookup(int amount){
+
+        List<Vector3> points = new ArrayList<>();
+
+        float stepDistance = curveLength / (float) amount;
+        System.out.println(curveLength);
+        System.out.println(stepDistance);
+
+
+        for (int i = 0; i <= amount; i++) {
+
+            float distance = i * stepDistance;
+
+            points.add(closestPositionOnLookupTable(distance).cpy());
+            //points.add(curve.valueAt(tmp1, curveLookUp.get(distance)));
+
+        }
+
+        return points;
+
+    }
+
+    private List<Vector3> divideByDerivative(int amount){
         List<Vector3> points = new ArrayList<>();
 
         float stepDistance = curveLength / (float) amount;
@@ -57,8 +102,8 @@ public class TrackSection implements Disposable {
 
             // This hack in the end point by just placing it on the end when near the end or past
             // the curve
-            if (t > 1 || position.dst(curve.valueAt(tmp, 1)) < stepDistance){
-                points.add(tmp);
+            if (t > 1 || position.dst(curve.valueAt(tmp1, 1)) < stepDistance){
+                points.add(tmp1);
                 return points;
             }
 
@@ -66,6 +111,22 @@ public class TrackSection implements Disposable {
         }
 
         return points;
+    }
+
+    private Vector3 closestPositionOnLookupTable(float distance) {
+
+        float difference = Float.MAX_VALUE;
+        for (Map.Entry<Float, Float> e : curveLookUp.entrySet()){
+            float currentDiference = Math.abs(distance - e.getKey());
+            if (currentDiference <= difference){
+                difference = currentDiference;
+            }
+            else {
+                return curve.valueAt(tmp1, curveLookUp.get(e.getKey()));
+            }
+        }
+
+        return curve.valueAt(tmp1, 1);
     }
 
     /**
@@ -101,9 +162,9 @@ public class TrackSection implements Disposable {
     public void drawCurve(ShapeRenderer shapeRenderer){
 
         curve.valueAt(position, 0);
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 50; i++) {
 
-            float t = i / 100f;
+            float t = i / 50f;
             curve.valueAt(derivative, t);
 
             shapeRenderer.line(position.x, position.y, position.z, derivative.x, derivative.y, derivative.z);
@@ -119,6 +180,12 @@ public class TrackSection implements Disposable {
     @Override
     public void dispose() {
         track.model.dispose();
+    }
+
+    private void generateMesh(){
+        // This might need to be variable based on curve length
+        final int sections = 10;
+        //Mesh mesh = new Mesh();
     }
 
 
