@@ -26,6 +26,8 @@ public class TrackSection implements Disposable {
     Vector3 position = new Vector3();
     Vector3 derivative = new Vector3();
 
+    Vector3 tmp = new Vector3();
+
     public TrackSection(Bezier<Vector3> curve) {
         this.curve = curve;
         curveLength = curve.approxLength(100);
@@ -53,6 +55,12 @@ public class TrackSection implements Disposable {
 
             t += stepDistance / len;
 
+            // This hack in the end point by just placing it on the end when near the end or past
+            // the curve
+            if (t > 1 || position.dst(curve.valueAt(tmp, 1)) < stepDistance){
+                points.add(tmp);
+                return points;
+            }
 
             points.add(position.cpy());
         }

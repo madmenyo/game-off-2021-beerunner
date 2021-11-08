@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -44,6 +45,8 @@ public class GameScreen extends ScreenAdapter {
     TrackGenerator trackGenerator;
     Player player;
 
+    Vector3 tmp = new Vector3();
+
     public GameScreen(AssetManager assetManager) {
         this.assetManager = assetManager;
 
@@ -67,6 +70,7 @@ public class GameScreen extends ScreenAdapter {
         meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
         SphereShapeBuilder.build(meshBuilder, 2, 1, 2, 16, 12);
         player = new Player(new ModelInstance(modelBuilder.end()), trackGenerator);
+
     }
 
 
@@ -112,6 +116,7 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
+        shapeRenderer.setColor(Color.WHITE);
         // Debug drawing
         trackGenerator.getCurrentTrackSection().drawCurve(shapeRenderer);
         for (TrackSection ts : trackGenerator.getPreviousSections())
@@ -123,6 +128,14 @@ public class GameScreen extends ScreenAdapter {
         for (Vector3 p : trackGenerator.getCurrentTrackSection().dividePoints(20)){
             drawBox(p, 1);
         }
+
+        float t =  trackGenerator.getCurrentTrackSection().getCurve().approximate(tmp.set(0 , 0, -10));
+
+        shapeRenderer.setColor(Color.RED);
+        drawBox(tmp, 1);
+        shapeRenderer.setColor(Color.GREEN);
+        drawBox(trackGenerator.getCurrentTrackSection().getCurve().valueAt(tmp, t), 1);
+
         shapeRenderer.end();
 
     }
