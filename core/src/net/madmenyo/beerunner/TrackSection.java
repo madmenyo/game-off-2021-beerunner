@@ -1,5 +1,8 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
@@ -38,33 +41,47 @@ public class TrackSection implements Disposable {
         this.curve = curve;
         curveLength = curve.approxLength(500);
 
+
+
+        createLookup(curve);
+
+    }
+
+    /**
+     * Creates a lookup table that maps distance to t on curve
+     * This way I can lookup position and derivative of t.
+     * If computation is small, consider mapping directly to position and derivative
+     * @param curve
+     */
+    private void createLookup(Bezier<Vector3> curve) {
         curveLookUp.put(0f, 0f);
-
-
-        // Generate lookup
         curve.valueAt(tmp2, 0f);
         float dst = 0;
         for (float t = 0f; t < 1f; ){
-            // Map detail
+            // Map detail (1000 looked very smooth, 500 shows some inconsistancies.
             t += 1f / 500;
-            if (t > 1f) t = 1f;
+            if (t > 1f){
+                t = 1f;
+            }
             curve.valueAt(tmp1, t);
             dst += tmp1.dst(tmp2);
             curveLookUp.put(dst, t);
 
             tmp2.set(tmp1);
         }
-
     }
 
     /**
      * Divides points over track, this needs tweaking since end point is not reached.
      * Should either push last point to end or do a second pass to even things out.
+     *
+     * Unless needing to draw debug stuff this does not need to be called every frame
+     * There is a lot of optimization potential in this method.
      * @param amount
      * @return
      */
     public List<Vector3> divideByLookup(int amount){
-
+        long time = System.currentTimeMillis();
         List<Vector3> points = new ArrayList<>();
 
         float stepDistance = curveLength / (float) amount;
@@ -80,12 +97,23 @@ public class TrackSection implements Disposable {
             //points.add(curve.valueAt(tmp1, curveLookUp.get(distance)));
 
         }
+        System.out.println("Divide by lookup" + (System.currentTimeMillis() - time) + "ms.");
 
         return points;
 
     }
 
-    private List<Vector3> divideByDerivative(int amount){
+    /**
+     * Divides the curve by derivative
+     * Seems prone to bugs,something about derivative being zero then the vector points nowhere.
+     * Creating a mesh this way creates some artifacts, I do not know if this method is the cause of
+     * that.
+     *
+     * For now use divideByLookup()
+     * @param amount
+     * @return
+     */
+    public List<Vector3> divideByDerivative(int amount){
         List<Vector3> points = new ArrayList<>();
 
         float stepDistance = curveLength / (float) amount;
@@ -113,6 +141,11 @@ public class TrackSection implements Disposable {
         return points;
     }
 
+    /**
+     * Returns the closest distance on the table as t
+     * @param distance
+     * @return
+     */
     private Vector3 closestPositionOnLookupTable(float distance) {
 
         float difference = Float.MAX_VALUE;
@@ -181,13 +214,6 @@ public class TrackSection implements Disposable {
     public void dispose() {
         track.model.dispose();
     }
-
-    private void generateMesh(){
-        // This might need to be variable based on curve length
-        final int sections = 10;
-        //Mesh mesh = new Mesh();
-    }
-
 
     /*
     // Somewhat hacky try out of creating a mesh, contains bugs using for reference
