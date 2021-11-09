@@ -107,8 +107,8 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        fpsController.update(delta * 20f);
-        //followCam.update(delta);
+        //fpsController.update(delta * 20f);
+        followCam.update(delta);
         player.update(delta);
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);

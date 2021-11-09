@@ -35,6 +35,7 @@ public class SimpleCurveGenerator implements ICurveGenerator {
         //quaternion.transform(Vector3.Y);
     }
 
+
     public Bezier<Vector3> getCurve(){
         points.clear();
 
@@ -46,36 +47,27 @@ public class SimpleCurveGenerator implements ICurveGenerator {
         p2.set(lastPoint.x + lastPoint.x - lastControl.x, lastPoint.y + lastPoint.y - lastControl.y, lastPoint.z + lastPoint.z - lastControl.z);
         points.add(p2);
 
-        // Next control and point should be random with constraints
+        // Set p3 randomly, but away from p2
         float distance = MathUtils.random() * 25 + 25f;
-        System.out.println(distance);
-
-        //System.out.println("First angle: " + new Vector2(direction.x, direction.z).angleDeg());
-
-
         float rotation = MathUtils.random(-maxRotation, maxRotation);
-        //quaternion.setEulerAngles(MathUtils.random(-maxRotation, maxRotation), 0, 0);
-        //float rotation = quaternion.getAngle();
 
         direction.rotate(Vector3.Y, rotation);
         p3.set(p2).add(direction.nor().scl(distance));
         p3.y += MathUtils.random(-maxHeightDifferent, maxHeightDifferent);
 
-        //System.out.println("second angle:" + new Vector2(direction.x, direction.z).angleDeg());
-
+        // Set p4 randomly, but away from p3
         distance = MathUtils.random() * 25 + 25f;
-
         rotation += MathUtils.random(-maxRotation, maxRotation);
-        //quaternion.setEulerAngles(MathUtils.random(-maxRotation, maxRotation), 0, 0);
-        //rotation = quaternion.getAngle();
 
         direction.rotate(Vector3.Y, rotation);
         p4.set(p3).add(direction.nor().scl(distance));
         p4.y += MathUtils.random(-maxHeightDifferent, maxHeightDifferent);
 
+        // Add the points
         points.add(p3);
         points.add(p4);
 
+        // set p3, p4 as last points to use them for mirroring in next curve
         lastPoint.set(p4);
         lastControl.set(p3);
 

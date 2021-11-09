@@ -18,6 +18,11 @@ public class FollowCam {
         this.trackGenerator = trackGenerator;
     }
 
+    /**
+     * This still needs work, probably need a method to set it behind the player on the curve,
+     * then depending on derivative offset and perhaps turn it.
+     * @param delta
+     */
     public void update(float delta){
         // Find t at player position
         float t = trackGenerator.getCurrentTrackSection().getCurve().approximate(player.getPosition());
@@ -35,7 +40,7 @@ public class FollowCam {
         derivative.nor();
         derivative.y = -derivative.y;
         derivative.rotate(Vector3.Y, 180);
-        derivative.scl(20);
+        derivative.scl(40);
 
 
         camera.position.set(position.set(player.getPosition()).add(derivative));
