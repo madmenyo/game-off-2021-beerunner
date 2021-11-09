@@ -241,6 +241,7 @@ public class TrackSection implements Disposable {
                 new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "u_texture"));
 
         // Generare verts
+        int index = 0;
         float[] verts = new float[vertCount * attributes];
         for (int i = 0; i <= sections; i++) {
             position.set(findPosition(i * sectionDistance));
@@ -248,6 +249,27 @@ public class TrackSection implements Disposable {
 
             //   For each section line
             // Add vert positions
+            curve.valueAt(position, t);
+            curve.derivativeAt(derivative, t);
+
+            // Make derivate horizontal and normalize
+            derivative.y = 0;
+            derivative.nor();
+            // turn derivative to make it perpendicular on curve
+            derivative.rotate(Vector3.Y, 90);
+            // scale derivate so it represents the width of a single quad
+            derivative.scl(5);
+
+            // use derivate to offset verts from curve
+
+            // hardcode 3 quads width so move it from -150% -> -50% -> +50% -> +150%
+            position.sub(tmp1.set(derivative).scl(1.5f));
+
+
+            for (int y = 0; y < 4; y++) {
+//                verts[index]
+
+            }
 
 
             // Add normal direction
