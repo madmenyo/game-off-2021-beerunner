@@ -15,12 +15,14 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -45,6 +47,8 @@ public class GameScreen extends ScreenAdapter {
 
     Vector3 tmp = new Vector3();
 
+    FollowCam followCam;
+
     public GameScreen(AssetManager assetManager) {
         this.assetManager = assetManager;
 
@@ -62,6 +66,7 @@ public class GameScreen extends ScreenAdapter {
 
         trackGenerator = new TrackGenerator();
 
+        /*
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
         MeshPartBuilder meshBuilder;
@@ -69,6 +74,12 @@ public class GameScreen extends ScreenAdapter {
         SphereShapeBuilder.build(meshBuilder, 2, 1, 2, 16, 12);
         player = new Player(new ModelInstance(modelBuilder.end()), trackGenerator);
 
+         */
+
+        G3dModelLoader modelLoader = new G3dModelLoader(new JsonReader());
+        player = new Player(new ModelInstance(modelLoader.loadModel(Gdx.files.internal("models/bee.g3dj"))), trackGenerator);
+
+        followCam = new FollowCam(camera, player, trackGenerator);
     }
 
 
@@ -97,6 +108,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         fpsController.update(delta * 20f);
+        //followCam.update(delta);
         player.update(delta);
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);
@@ -108,8 +120,12 @@ public class GameScreen extends ScreenAdapter {
         spriteBatch.end();
 
         modelBatch.begin(camera);
-        modelBatch.render(trackGenerator.getCurrentTrackSection().getTrack());
+        modelBatch.render(trackGenerator.getCurrentTrackSection().getTrack(), environment);
         modelBatch.render(player.getModelInstance(), environment);
+        modelBatch.render(trackGenerator.getNextSection().getTrack(), environment);
+        for (TrackSection track : trackGenerator.getPreviousSections()){
+            modelBatch.render(track.getTrack(), environment);
+        }
         modelBatch.end();
 
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -121,10 +137,14 @@ public class GameScreen extends ScreenAdapter {
         for (TrackSection ts : trackGenerator.getPreviousSections())
         {
             ts.drawCurve(shapeRenderer);
+
+            for (Vector3 p : ts.divideByLookup(10)){
+                drawBox(p, 1);
+            }
         }
 
         // Division of curves
-        for (Vector3 p : trackGenerator.getCurrentTrackSection().divideByLookup(20)){
+        for (Vector3 p : trackGenerator.getCurrentTrackSection().divideByLookup(10)){
             drawBox(p, 1);
         }
 
@@ -137,6 +157,12 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.setColor(Color.CYAN);
         trackGenerator.getCurrentTrackSection().drawVerts(shapeRenderer);
+
+        for (TrackSection ts : trackGenerator.getPreviousSections())
+        {
+            ts.drawVerts(shapeRenderer);
+        }
+
 
         shapeRenderer.end();
 

@@ -15,6 +15,8 @@ public class TrackGenerator {
     /** The current track **/
     private TrackSection currentTrackSection;
 
+    private TrackSection nextSection;
+
     private List<TrackSection> previousSections = new ArrayList<>();
 
     public TrackGenerator() {
@@ -22,9 +24,11 @@ public class TrackGenerator {
         curveGenerator = new SimpleCurveGenerator();
 
         currentTrackSection = new TrackSection(curveGenerator.getCurve());
+        nextSection = new TrackSection(curveGenerator.getCurve());
 
 
         // Dummy track section
+        /*
         currentTrackSection = new TrackSection(new Bezier<>(
                 new Vector3(0,0,0),
                 new Vector3(15,0,5),
@@ -32,18 +36,25 @@ public class TrackGenerator {
                 new Vector3(15,0,100)
         ));
 
+         */
+
     }
 
 
     public float nextTrack() {
         // For now stay on current track and reset t
-        //previousSections.add(currentTrackSection);
-        //currentTrackSection = new TrackSection(curveGenerator.getCurve());
+        previousSections.add(currentTrackSection);
+        currentTrackSection = nextSection;
+        nextSection = new TrackSection(curveGenerator.getCurve());
         return 0f;
     }
 
     public TrackSection getCurrentTrackSection() {
         return currentTrackSection;
+    }
+
+    public TrackSection getNextSection() {
+        return nextSection;
     }
 
     public List<TrackSection> getPreviousSections() {

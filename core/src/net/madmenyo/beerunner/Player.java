@@ -63,15 +63,19 @@ public class Player {
         trackGenerator.getCurrentTrackSection().getCurve().derivativeAt(derivative, t);
 
         derivative.nor();
+        //modelInstance.transform.rotateTowardDirection(derivative.cpy(), Vector3.Y);
         derivative.y = 0;
         derivative.rotate(Vector3.Y, -90);
 
         // Set the position
         modelInstance.transform.set(position, quaternion);
 
+
         // Translate position to current offsets
         modelInstance.transform.translate(derivative.scl(offset));
         modelInstance.transform.translate(0, height, 0);
+        trackGenerator.getCurrentTrackSection().getCurve().derivativeAt(derivative, t);
+        modelInstance.transform.rotateTowardDirection(derivative.scl(-1), Vector3.Y);
     }
 
     /**
@@ -80,10 +84,10 @@ public class Player {
      */
     private void controlls(float delta) {
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            offset -= 5 * delta;
+            offset -= 15 * delta;
 
         } else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            offset += 5 * delta;
+            offset += 15 * delta;
         }
         MathUtils.clamp(offset, -5, 5);
     }
@@ -115,4 +119,8 @@ public class Player {
 
         }
     }*/
+
+    public Vector3 getPosition() {
+        return position;
+    }
 }

@@ -1,11 +1,14 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
@@ -255,7 +258,13 @@ public class TrackSection implements Disposable {
             position.set(findPosition(i * sectionDistance));
             float t = findT(i * sectionDistance);
 
-            //   For each section line
+            if (i == sections){
+                t = 1;
+            } else if (i == 0){
+                t = 0;
+            }
+
+                //   For each section line
             // Add vert positions
             curve.valueAt(position, t);
             curve.derivativeAt(derivative, t);
@@ -326,7 +335,7 @@ public class TrackSection implements Disposable {
 
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
-        modelBuilder.part("Track", mesh, GL20.GL_TRIANGLES, new Material());
+        modelBuilder.part("Track", mesh, GL20.GL_TRIANGLES, new Material(new ColorAttribute(ColorAttribute.Diffuse, Color.GRAY)));
         track = new ModelInstance(modelBuilder.end());
         // Create model from mesh and add it to the track instance.
     }
