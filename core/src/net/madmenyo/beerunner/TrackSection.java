@@ -1,9 +1,15 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector3;
@@ -25,6 +31,7 @@ public class TrackSection implements Disposable {
 
 
     private ModelInstance track;
+    float[] verts;
 
     private Array<ModelInstance> sideObjects = new Array<>();
 
@@ -41,9 +48,9 @@ public class TrackSection implements Disposable {
         this.curve = curve;
         curveLength = curve.approxLength(500);
 
-
-
         createLookup(curve);
+
+        generateMesh(5);
 
     }
 
@@ -81,12 +88,12 @@ public class TrackSection implements Disposable {
      * @return
      */
     public List<Vector3> divideByLookup(int amount){
-        long time = System.currentTimeMillis();
+        //long time = System.currentTimeMillis();
         List<Vector3> points = new ArrayList<>();
 
         float stepDistance = curveLength / (float) amount;
-        System.out.println(curveLength);
-        System.out.println(stepDistance);
+        //System.out.println(curveLength);
+        //System.out.println(stepDistance);
 
 
         for (int i = 0; i <= amount; i++) {
@@ -97,7 +104,7 @@ public class TrackSection implements Disposable {
             //points.add(curve.valueAt(tmp1, curveLookUp.get(distance)));
 
         }
-        System.out.println("Divide by lookup" + (System.currentTimeMillis() - time) + "ms.");
+        //System.out.println("Divide by lookup" + (System.currentTimeMillis() - time) + "ms.");
 
         return points;
 
@@ -233,16 +240,17 @@ public class TrackSection implements Disposable {
         // Sharing quads? each section line had 4 verts, also has aditional end line at t = 1.
         final int vertCount = (sections + 1) * 4;
         final int indiceCount = quadCount * 6;
-        final int attributes = 8;
+        final int attributes = 3;//8;
 
         Mesh mesh = new Mesh(true, vertCount, indiceCount,
-                new VertexAttribute(VertexAttributes.Usage.Position, 3, "u_position"),
-                new VertexAttribute(VertexAttributes.Usage.Normal, 3, "u_normal"),
-                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "u_texture"));
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position")
+                //new VertexAttribute(VertexAttributes.Usage.Normal, 3, "u_normal"),
+                //new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "u_texture")
+        );
 
         // Generare verts
         int index = 0;
-        float[] verts = new float[vertCount * attributes];
+        verts = new float[vertCount * attributes];
         for (int i = 0; i <= sections; i++) {
             position.set(findPosition(i * sectionDistance));
             float t = findT(i * sectionDistance);
@@ -263,12 +271,14 @@ public class TrackSection implements Disposable {
             // use derivate to offset verts from curve
 
             // hardcode 3 quads width so move it from -150% -> -50% -> +50% -> +150%
-            position.sub(tmp1.set(derivative).scl(1.5f));
-
+            position.add(tmp1.set(derivative).scl(1.5f));
+            derivative.rotate(Vector3.Y,180);
 
             for (int y = 0; y < 4; y++) {
-//                verts[index]
-
+                verts[index++] = position.x;
+                verts[index++] = position.y;
+                verts[index++] = position.z;
+                position.add(derivative);
             }
 
 
@@ -281,10 +291,54 @@ public class TrackSection implements Disposable {
             // Depending on width and section distance add UV. Probably use larger section distance
             // to add a bit more texture detail at the cost of some geometry.
 
-
         }
 
+        // Set indices
+        short[] indices = new short[indiceCount];
+        for (int i = 0; i < sections; i++) {
+            indices[i * 6 * 3 + 0] = (short) (i * 4 + 0);
+            indices[i * 6 * 3 + 1] = (short) (i * 4 + 1);
+            indices[i * 6 * 3 + 2] = (short) ((i + 1) * 4 + 0);
+
+            indices[i * 6 * 3 + 3] = (short) (i  * 4 + 1);
+            indices[i * 6 * 3 + 4] = (short) ((i + 1) * 4 + 1);
+            indices[i * 6 * 3 + 5] = (short) ((i + 1) * 4 + 0);
+
+            indices[i * 6 * 3 + 6] = (short) (i * 4 + 1);
+            indices[i * 6 * 3 + 7] = (short) (i * 4 + 2);
+            indices[i * 6 * 3 + 8] = (short) ((i + 1) * 4 + 1);
+
+            indices[i * 6 * 3 + 9] = (short) (i  * 4 + 2);
+            indices[i * 6 * 3 + 10] = (short) ((i + 1) * 4 + 2);
+            indices[i * 6 * 3 + 11] = (short) ((i + 1) * 4 + 1);
+
+            indices[i * 6 * 3 + 12] = (short) (i * 4 + 2);
+            indices[i * 6 * 3 + 13] = (short) (i * 4 + 3);
+            indices[i * 6 * 3 + 14] = (short) ((i + 1) * 4 + 2);
+
+            indices[i * 6 * 3 + 15] = (short) (i  * 4 + 3);
+            indices[i * 6 * 3 + 16] = (short) ((i + 1) * 4 + 3);
+            indices[i * 6 * 3 + 17] = (short) ((i + 1) * 4 + 2);
+        }
+
+        mesh.setVertices(verts);
+        mesh.setIndices(indices);
+
+        ModelBuilder modelBuilder = new ModelBuilder();
+        modelBuilder.begin();
+        modelBuilder.part("Track", mesh, GL20.GL_TRIANGLES, new Material());
+        track = new ModelInstance(modelBuilder.end());
         // Create model from mesh and add it to the track instance.
+    }
+
+    public ModelInstance getTrack() {
+        return track;
+    }
+
+    public void drawVerts(ShapeRenderer renderer){
+        for (int i = 0; i < verts.length; i+= 3) {
+            renderer.box(verts[i] - .1f, verts[i + 1] - .1f, verts[i + 2] + .1f, .2f, .2f, .2f);
+        }
     }
 
     /*

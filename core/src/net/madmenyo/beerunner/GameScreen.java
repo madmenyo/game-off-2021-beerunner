@@ -108,6 +108,7 @@ public class GameScreen extends ScreenAdapter {
         spriteBatch.end();
 
         modelBatch.begin(camera);
+        modelBatch.render(trackGenerator.getCurrentTrackSection().getTrack());
         modelBatch.render(player.getModelInstance(), environment);
         modelBatch.end();
 
@@ -133,6 +134,9 @@ public class GameScreen extends ScreenAdapter {
         drawBox(tmp, 1);
         shapeRenderer.setColor(Color.GREEN);
         drawBox(trackGenerator.getCurrentTrackSection().getCurve().valueAt(tmp, t), 1);
+
+        shapeRenderer.setColor(Color.CYAN);
+        trackGenerator.getCurrentTrackSection().drawVerts(shapeRenderer);
 
         shapeRenderer.end();
 
