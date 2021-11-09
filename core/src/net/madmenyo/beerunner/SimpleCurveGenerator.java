@@ -2,6 +2,8 @@ package net.madmenyo.beerunner;
 
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
@@ -17,33 +19,65 @@ public class SimpleCurveGenerator implements ICurveGenerator {
 
     List<Vector3> points = new ArrayList<>();
 
+    Vector3 p1 = new Vector3();
+    Vector3 p2 = new Vector3();
+    Vector3 p3 = new Vector3();
+    Vector3 p4 = new Vector3();
 
+    Vector3 direction = new Vector3(0, 0, 1);
+    //Quaternion quaternion = new Quaternion();
+    float maxRotation = 45;
 
+    float currentHeight = 0;
+    float maxHeightDifferent = 50;
+
+    public SimpleCurveGenerator() {
+        //quaternion.transform(Vector3.Y);
+    }
 
     public Bezier<Vector3> getCurve(){
         points.clear();
 
         // first point should match last point
-        points.add(lastPoint.cpy());
+
+        points.add(p1.set(lastPoint));
 
         // first control should mirror lastControl
-        points.add(new Vector3(lastPoint.x + lastPoint.x - lastControl.x, lastPoint.y + lastPoint.y - lastControl.y, lastPoint.z + lastPoint.z - lastControl.z));
+        p2.set(lastPoint.x + lastPoint.x - lastControl.x, lastPoint.y + lastPoint.y - lastControl.y, lastPoint.z + lastPoint.z - lastControl.z);
+        points.add(p2);
 
         // Next control and point should be random with constraints
-        float distance = MathUtils.random() * 200 + 100f; // 100 - 200
+        float distance = MathUtils.random() * 25 + 25f;
+        System.out.println(distance);
 
-        // Create end point
-        Vector3 endPoint = new Vector3(lastPoint.x + MathUtils.random() * 300 - 150, lastPoint.y + MathUtils.random() * 500 - 250, lastPoint.z + distance);
+        //System.out.println("First angle: " + new Vector2(direction.x, direction.z).angleDeg());
 
-        // create end control
-        Vector3 endControl = new Vector3(endPoint);
-        endControl.z -= MathUtils.random() * 25 + 25;
 
-        points.add(endControl);
-        points.add(endPoint);
+        float rotation = MathUtils.random(-maxRotation, maxRotation);
+        //quaternion.setEulerAngles(MathUtils.random(-maxRotation, maxRotation), 0, 0);
+        //float rotation = quaternion.getAngle();
 
-        lastPoint.set(endPoint);
-        lastControl.set(endControl);
+        direction.rotate(Vector3.Y, rotation);
+        p3.set(p2).add(direction.nor().scl(distance));
+        p3.y += MathUtils.random(-maxHeightDifferent, maxHeightDifferent);
+
+        //System.out.println("second angle:" + new Vector2(direction.x, direction.z).angleDeg());
+
+        distance = MathUtils.random() * 25 + 25f;
+
+        rotation += MathUtils.random(-maxRotation, maxRotation);
+        //quaternion.setEulerAngles(MathUtils.random(-maxRotation, maxRotation), 0, 0);
+        //rotation = quaternion.getAngle();
+
+        direction.rotate(Vector3.Y, rotation);
+        p4.set(p3).add(direction.nor().scl(distance));
+        p4.y += MathUtils.random(-maxHeightDifferent, maxHeightDifferent);
+
+        points.add(p3);
+        points.add(p4);
+
+        lastPoint.set(p4);
+        lastControl.set(p3);
 
         return new Bezier<>(points.get(0).cpy(), points.get(1).cpy(), points.get(2).cpy(), points.get(3).cpy());
     }

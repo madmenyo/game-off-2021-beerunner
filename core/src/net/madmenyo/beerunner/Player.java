@@ -19,7 +19,7 @@ public class Player {
     private TrackGenerator trackGenerator;
 
 
-    private float speed = 50;
+    private float speed = 100;
 
 
     private float t = 0;

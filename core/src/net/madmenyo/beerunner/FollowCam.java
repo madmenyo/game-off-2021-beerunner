@@ -41,6 +41,7 @@ public class FollowCam {
         camera.position.set(position.set(player.getPosition()).add(derivative));
         camera.position.y += 15;
         camera.lookAt(player.getPosition());
+        camera.up.set(Vector3.Y);
         camera.update();
 
     }
