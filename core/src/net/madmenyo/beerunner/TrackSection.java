@@ -3,6 +3,7 @@ package net.madmenyo.beerunner;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -32,6 +33,7 @@ public class TrackSection implements Disposable {
     private Bezier<Vector3> curve;
     float curveLength;
 
+    private float trackWidth;
 
     private ModelInstance track;
     float[] verts;
@@ -50,6 +52,7 @@ public class TrackSection implements Disposable {
     public TrackSection(Bezier<Vector3> curve) {
         this.curve = curve;
         curveLength = curve.approxLength(500);
+        trackWidth = 10;
 
         createLookup(curve);
 
@@ -243,17 +246,19 @@ public class TrackSection implements Disposable {
         // Sharing quads? each section line had 4 verts, also has aditional end line at t = 1.
         final int vertCount = (sections + 1) * 4;
         final int indiceCount = quadCount * 6;
-        final int attributes = 3;//8;
+        final int attributes = 8;//8;
 
         Mesh mesh = new Mesh(true, vertCount, indiceCount,
-                new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position")
-                //new VertexAttribute(VertexAttributes.Usage.Normal, 3, "u_normal"),
-                //new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "u_texture")
+                new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position"),
+                new VertexAttribute(VertexAttributes.Usage.Normal, 3, "a_normal"),
+                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_texCoord0")
         );
 
         // Generare verts
         int index = 0;
         verts = new float[vertCount * attributes];
+
+        boolean even = true;
         for (int i = 0; i <= sections; i++) {
             position.set(findPosition(i * sectionDistance));
             float t = findT(i * sectionDistance);
@@ -275,7 +280,7 @@ public class TrackSection implements Disposable {
             // turn derivative to make it perpendicular on curve
             derivative.rotate(Vector3.Y, 90);
             // scale derivate so it represents the width of a single quad
-            derivative.scl(5);
+            derivative.scl(trackWidth / 3);
 
             // use derivate to offset verts from curve
 
@@ -283,12 +288,28 @@ public class TrackSection implements Disposable {
             position.add(tmp1.set(derivative).scl(1.5f));
             derivative.rotate(Vector3.Y,180);
 
+            curve.derivativeAt(tmp1, t);
+            tmp1.nor();
+            tmp1.rotate(90, -tmp1.z, 0, tmp1.x);
+
             for (int y = 0; y < 4; y++) {
                 verts[index++] = position.x;
                 verts[index++] = position.y;
                 verts[index++] = position.z;
                 position.add(derivative);
+
+                // calculate normal by turning derivative
+                verts[index++] = tmp1.x;
+                verts[index++] = tmp1.y;
+                verts[index++] = tmp1.z;
+
+                // UV
+                verts[index++] = y / 3f;
+                if (even) verts[index++] = 0;
+                else verts[index++] = 1;
+
             }
+            even = !even;
 
 
             // Add normal direction
@@ -335,7 +356,8 @@ public class TrackSection implements Disposable {
 
         ModelBuilder modelBuilder = new ModelBuilder();
         modelBuilder.begin();
-        modelBuilder.part("Track", mesh, GL20.GL_TRIANGLES, new Material(new ColorAttribute(ColorAttribute.Diffuse, Color.GRAY)));
+        //modelBuilder.part("Track", mesh, GL20.GL_TRIANGLES, new Material(new ColorAttribute(ColorAttribute.Diffuse, Color.GRAY)));
+        modelBuilder.part("Track", mesh, GL20.GL_TRIANGLES, new Material(new TextureAttribute(TextureAttribute.Diffuse, new Texture("models/path.png"))));
         track = new ModelInstance(modelBuilder.end());
         // Create model from mesh and add it to the track instance.
     }
@@ -344,10 +366,44 @@ public class TrackSection implements Disposable {
         return track;
     }
 
-    public void drawVerts(ShapeRenderer renderer){
+    /**
+     * Debug method to visualize verts
+     * @param renderer
+     */
+    public void debugDrawVerts(ShapeRenderer renderer){
         for (int i = 0; i < verts.length; i+= 3) {
             renderer.box(verts[i] - .1f, verts[i + 1] - .1f, verts[i + 2] + .1f, .2f, .2f, .2f);
         }
+    }
+
+    /**
+     * Debug method to visualize derivative
+     * @param renderer
+     */
+    public void debugDrawDerivative(ShapeRenderer renderer){
+        float stepDistance = curveLength / 10;
+
+
+        for (float t = 0f; t <= 1f; ) {
+            curve.valueAt(position, t);
+            curve.derivativeAt(derivative, t);
+
+            float len = derivative.len();
+
+            //derivative.scl(1/ len);
+
+            t += stepDistance / len;
+
+            derivative.nor().scl(stepDistance * .25f);
+
+            derivative.rotate(90, -derivative.z,0,  derivative.x);
+
+            renderer.line(position.x, position.y, position.z, position.x + derivative.x, position.y + derivative.y, position.z + derivative.z);
+
+            // This hack in the end point by just placing it on the end when near the end or past
+            // the curve
+        }
+
     }
 
     /*

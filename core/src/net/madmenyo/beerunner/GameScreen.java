@@ -7,19 +7,14 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.JsonReader;
@@ -130,6 +125,7 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        /*
 
         shapeRenderer.setColor(Color.WHITE);
         // Debug drawing
@@ -150,19 +146,25 @@ public class GameScreen extends ScreenAdapter {
 
         float t =  trackGenerator.getCurrentTrackSection().getCurve().approximate(tmp.set(0 , 0, -10));
 
-        shapeRenderer.setColor(Color.RED);
-        drawBox(tmp, 1);
+
         shapeRenderer.setColor(Color.GREEN);
         drawBox(trackGenerator.getCurrentTrackSection().getCurve().valueAt(tmp, t), 1);
 
         shapeRenderer.setColor(Color.CYAN);
-        trackGenerator.getCurrentTrackSection().drawVerts(shapeRenderer);
+        trackGenerator.getCurrentTrackSection().debugDrawVerts(shapeRenderer);
 
         for (TrackSection ts : trackGenerator.getPreviousSections())
         {
-            ts.drawVerts(shapeRenderer);
+            ts.debugDrawVerts(shapeRenderer);
         }
 
+
+        shapeRenderer.setColor(Color.GREEN);
+        for (TrackSection ts : trackGenerator.getPreviousSections())
+        {
+            ts.debugDrawDerivative(shapeRenderer);
+        }
+         */
 
         shapeRenderer.end();
 
