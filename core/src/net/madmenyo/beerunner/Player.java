@@ -25,9 +25,9 @@ public class Player {
     private float t = 0;
 
     /** Height offset from curve **/
-    private float height = 1;
+    private float height = 0;
     /** Horizontal offset from curve **/
-    private float offset = 3;
+    private float offset = 0;
 
     public Player(ModelInstance modelInstance, TrackGenerator trackGenerator) {
         this.modelInstance = modelInstance;
@@ -122,5 +122,9 @@ public class Player {
 
     public Vector3 getPosition() {
         return position;
+    }
+
+    public float getT() {
+        return t;
     }
 }

@@ -103,8 +103,9 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         //fpsController.update(delta * 20f);
-        followCam.update(delta);
+        //followCam.update(delta);
         player.update(delta);
+        trackGenerator.setCameraBehind(camera, player, shapeRenderer);
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -165,6 +166,8 @@ public class GameScreen extends ScreenAdapter {
             ts.debugDrawDerivative(shapeRenderer);
         }
          */
+
+        shapeRenderer.setColor(Color.YELLOW);
 
         shapeRenderer.end();
 

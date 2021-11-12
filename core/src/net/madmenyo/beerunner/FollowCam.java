@@ -3,6 +3,9 @@ package net.madmenyo.beerunner;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * Should use the track to place camera behind the player, probably even use distance
+ */
 public class FollowCam {
     private PerspectiveCamera camera;
     private Player player;

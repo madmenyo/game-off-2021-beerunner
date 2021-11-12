@@ -159,7 +159,7 @@ public class TrackSection implements Disposable {
      * @param distance
      * @return
      */
-    private Vector3 findPosition(float distance) {
+    public Vector3 findPosition(float distance) {
         return curve.valueAt(tmp1, findT(distance));
     }
 
@@ -168,7 +168,7 @@ public class TrackSection implements Disposable {
      * @param distance
      * @return
      */
-    private float findT(float distance){
+    public float findT(float distance){
         float difference = Float.MAX_VALUE;
         for (Map.Entry<Float, Float> e : curveLookUp.entrySet()){
             float currentDiference = Math.abs(distance - e.getKey());
