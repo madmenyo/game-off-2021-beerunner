@@ -1,8 +1,11 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
@@ -12,6 +15,7 @@ import java.util.List;
  * Responsible for generating tracks on demand and keeping records.
  */
 public class TrackGenerator {
+    private AssetManager assetManager;
     private ICurveGenerator curveGenerator;
 
     /** The current track **/
@@ -24,11 +28,15 @@ public class TrackGenerator {
     private List<PathObject> pathObjects = new ArrayList<>();
 
 
-    /** distance prior to track **/
+    /** Total distance of previous tracks **/
     private float distance;
 
-    public TrackGenerator() {
+    private float lastObstacleDistance = 0;
+    private float lastResourceDistance = 0;
 
+
+    public TrackGenerator(AssetManager assetManager) {
+        this.assetManager = assetManager;
         curveGenerator = new SimpleCurveGenerator();
 
         currentTrackSection = new TrackSection(curveGenerator.getCurve());
@@ -51,10 +59,21 @@ public class TrackGenerator {
 
     public float nextTrack() {
         // For now stay on current track and reset t
+        distance += currentTrackSection.curveLength;
         previousSections.add(currentTrackSection);
         currentTrackSection = nextSection;
         nextSection = new TrackSection(curveGenerator.getCurve());
+
+        placeObjects(nextSection);
         return 0f;
+    }
+
+    private void placeObjects(TrackSection track) {
+
+        ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
+        ml.transform.translate(track.findPosition(100));
+        ml.transform.scl(0.04f);
+        pathObjects.add(new PathObject(ml));
     }
 
     public TrackSection getCurrentTrackSection() {
@@ -107,5 +126,9 @@ public class TrackGenerator {
         camera.up.set(Vector3.Y);
         camera.update();
 
+    }
+
+    public List<PathObject> getPathObjects() {
+        return pathObjects;
     }
 }

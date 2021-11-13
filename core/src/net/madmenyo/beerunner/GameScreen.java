@@ -59,7 +59,7 @@ public class GameScreen extends ScreenAdapter {
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
         modelBatch = new ModelBatch();
 
-        trackGenerator = new TrackGenerator();
+        trackGenerator = new TrackGenerator(assetManager);
 
         /*
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -121,6 +121,10 @@ public class GameScreen extends ScreenAdapter {
         modelBatch.render(trackGenerator.getNextSection().getTrack(), environment);
         for (TrackSection track : trackGenerator.getPreviousSections()){
             modelBatch.render(track.getTrack(), environment);
+        }
+
+        for (PathObject object : trackGenerator.getPathObjects()){
+            modelBatch.render(object.getModelInstance(), environment);
         }
         modelBatch.end();
 

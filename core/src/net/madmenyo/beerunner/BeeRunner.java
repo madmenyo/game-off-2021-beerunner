@@ -6,6 +6,12 @@ public class BeeRunner extends Game {
 	
 	@Override
 	public void create () {
-		setScreen(new GameScreen(null));
+		Assets assets= new Assets();
+
+		assets.load();
+
+
+
+		setScreen(new GameScreen(assets.getAssetManager()));
 	}
 }
