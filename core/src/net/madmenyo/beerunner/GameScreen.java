@@ -7,13 +7,16 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
@@ -36,13 +39,20 @@ public class GameScreen extends ScreenAdapter {
 
     private AssetManager assetManager;
 
+
     // Tests, might need refactoring
     TrackGenerator trackGenerator;
     Player player;
 
-    Vector3 tmp = new Vector3();
-
     FollowCam followCam;
+
+    BitmapFont font;
+
+    DirectionalShadowLight shadowLight;
+
+    ModelBatch shadowBatch;
+
+    Vector3 tmp = new Vector3();
 
     public GameScreen(AssetManager assetManager) {
         this.assetManager = assetManager;
@@ -56,7 +66,27 @@ public class GameScreen extends ScreenAdapter {
 
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-        environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+
+        //DirectionalLight light = new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f);
+        /*
+        shadowLight = new DirectionalShadowLight(
+                1048, 1048,
+                viewport.getWorldWidth(), viewport.getWorldHeight(),
+                1, 300);
+         */
+
+        environment.add((shadowLight = new DirectionalShadowLight(2048, 2048,
+                600, 600,
+                .1f, 2000f))
+                .set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+                //.set(1f, 1f, 1f, 40.0f, -35f, -35f));
+        environment.shadowMap = shadowLight;
+
+
+
+
+
+        shadowBatch = new ModelBatch(new DepthShaderProvider());
         modelBatch = new ModelBatch();
 
         trackGenerator = new TrackGenerator(assetManager);
@@ -75,6 +105,8 @@ public class GameScreen extends ScreenAdapter {
         player = new Player(new ModelInstance(modelLoader.loadModel(Gdx.files.internal("models/bee.g3dj"))), trackGenerator);
 
         followCam = new FollowCam(camera, player, trackGenerator);
+
+        font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
     }
 
 
@@ -103,29 +135,70 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         //fpsController.update(delta * 20f);
-        //followCam.update(delta);
+        followCam.update(delta);
         player.update(delta);
-        trackGenerator.setCameraBehind(camera, player, shapeRenderer);
+        //trackGenerator.setCameraBehind(camera, player, shapeRenderer);
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        spriteBatch.setProjectionMatrix(camera.combined);
-        spriteBatch.begin();
 
-        spriteBatch.end();
+        //create shadow texture
+        shadowLight.begin(tmp.set(camera.position), camera.direction);
+        shadowBatch.begin(shadowLight.getCamera());
+
+        shadowBatch.render(trackGenerator.getCurrentTrackSection().getTrack(), environment);
+        shadowBatch.render(player.getModelInstance(), environment);
+        shadowBatch.render(trackGenerator.getNextSection().getTrack(), environment);
+
+
+        for (ModelInstance modelInstance : trackGenerator.getCurrentTrackSection().getSideObjects()){
+            shadowBatch.render(modelInstance, environment);
+        }
+
+        for (ModelInstance modelInstance : trackGenerator.getNextSection().getSideObjects()){
+            shadowBatch.render(modelInstance, environment);
+        }
+
+        for (TrackSection track : trackGenerator.getPreviousSections()){
+            shadowBatch.render(track.getTrack(), environment);
+            for (ModelInstance modelInstance : track.getSideObjects()){
+                shadowBatch.render(modelInstance, environment);
+            }
+        }
+        //shadowBatch.render(instances);
+
+        shadowBatch.end();
+        shadowLight.end();
 
         modelBatch.begin(camera);
         modelBatch.render(trackGenerator.getCurrentTrackSection().getTrack(), environment);
         modelBatch.render(player.getModelInstance(), environment);
         modelBatch.render(trackGenerator.getNextSection().getTrack(), environment);
+
+        for (ModelInstance modelInstance : trackGenerator.getCurrentTrackSection().getSideObjects()){
+            modelBatch.render(modelInstance, environment);
+        }
+
+        for (ModelInstance modelInstance : trackGenerator.getNextSection().getSideObjects()){
+            modelBatch.render(modelInstance, environment);
+        }
+
         for (TrackSection track : trackGenerator.getPreviousSections()){
             modelBatch.render(track.getTrack(), environment);
+            for (ModelInstance modelInstance : track.getSideObjects()){
+                modelBatch.render(modelInstance, environment);
+            }
         }
+
+
 
         for (PathObject object : trackGenerator.getPathObjects()){
             modelBatch.render(object.getModelInstance(), environment);
         }
+
+
+
         modelBatch.end();
 
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -174,6 +247,15 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.setColor(Color.YELLOW);
 
         shapeRenderer.end();
+
+        spriteBatch.begin();
+
+        //String formattedString = String.format("Distance: %.1f", (player.getTotalDistance() * .05f));
+        //font.draw(spriteBatch, formattedString, 10, 30);
+        font.draw(spriteBatch, "" + (int)(player.getTotalDistance() * .08f), 10, 30);
+
+        spriteBatch.end();
+
 
     }
 

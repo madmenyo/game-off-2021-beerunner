@@ -23,24 +23,27 @@ public class TrackGenerator {
 
     private TrackSection nextSection;
 
-    private List<TrackSection> previousSections = new ArrayList<>();
+    private final List<TrackSection> previousSections = new ArrayList<>();
 
-    private List<PathObject> pathObjects = new ArrayList<>();
+    private final List<PathObject> pathObjects = new ArrayList<>();
 
 
     /** Total distance of previous tracks **/
-    private float distance;
 
     private float lastObstacleDistance = 0;
     private float lastResourceDistance = 0;
 
+    private Vector3 tmp1 = new Vector3();
+    private Vector3 tmp2 = new Vector3();
 
     public TrackGenerator(AssetManager assetManager) {
         this.assetManager = assetManager;
         curveGenerator = new SimpleCurveGenerator();
 
         currentTrackSection = new TrackSection(curveGenerator.getCurve());
+        placeObjects(currentTrackSection);
         nextSection = new TrackSection(curveGenerator.getCurve());
+        placeObjects(nextSection);
 
 
         // Dummy track section
@@ -59,8 +62,12 @@ public class TrackGenerator {
 
     public float nextTrack() {
         // For now stay on current track and reset t
-        distance += currentTrackSection.curveLength;
         previousSections.add(currentTrackSection);
+        if (previousSections.size() > 3){
+            System.out.println("removing");
+            previousSections.get(2).dispose();
+            previousSections.remove(2);
+        }
         currentTrackSection = nextSection;
         nextSection = new TrackSection(curveGenerator.getCurve());
 
@@ -68,13 +75,62 @@ public class TrackGenerator {
         return 0f;
     }
 
+
+    /**
+     * No more time left, just hack in some objects to give the world some live
+     * @param track
+     */
     private void placeObjects(TrackSection track) {
 
-        ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
-        ml.transform.translate(track.findPosition(100));
-        ml.transform.scl(0.04f);
-        pathObjects.add(new PathObject(ml));
+        // Left side
+        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+
+            d += MathUtils.random() * 5 + 10;
+
+            ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
+            float t = track.findT(d);
+            track.getCurve().valueAt(tmp1, t);
+            track.getCurve().derivativeAt(tmp2, t);
+
+            tmp2.y = 0;
+            tmp2.nor();
+            tmp2.rotate(Vector3.Y, 90);
+            tmp2.scl(track.getTrackWidth() / 3f + MathUtils.random() * track.getTrackWidth() * .2f);
+            tmp1.add(tmp2);
+
+            ml.transform.translate(tmp1);
+            ml.transform.scl(MathUtils.random(.03f, .05f));
+            ml.transform.rotate(Vector3.Y, MathUtils.random(360));
+
+            track.getSideObjects().add(ml);
+            //pathObjects.add(new PathObject(ml));
+        }
+
+        // right side
+        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+
+            d += MathUtils.random() * 2 + 5;
+
+            ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
+            float t = track.findT(d);
+            track.getCurve().valueAt(tmp1, t);
+            track.getCurve().derivativeAt(tmp2, t);
+
+            tmp2.y = 0;
+            tmp2.nor();
+            tmp2.rotate(Vector3.Y, 90);
+            tmp2.scl(track.getTrackWidth() / -3f - MathUtils.random() * track.getTrackWidth() * .2f);
+            tmp1.add(tmp2);
+
+            ml.transform.translate(tmp1);
+            ml.transform.scl(MathUtils.random(.03f, .05f));
+            ml.transform.rotate(Vector3.Y, MathUtils.random(360));
+
+            track.getSideObjects().add(ml);
+            //pathObjects.add(new PathObject(ml));
+        }
     }
+
 
     public TrackSection getCurrentTrackSection() {
         return currentTrackSection;
@@ -118,7 +174,6 @@ public class TrackGenerator {
             trackSection = currentTrackSection;
         }
 
-        System.out.println(t);
         trackSection.getCurve().valueAt(v3, t);
         v3.y += 8;
         camera.position.set(v3);

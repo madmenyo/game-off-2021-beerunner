@@ -19,15 +19,16 @@ public class Player {
     private TrackGenerator trackGenerator;
 
 
-    private float speed = 100;
+    private float speed = 80;
 
 
     private float t = 0;
 
     /** Height offset from curve **/
-    private float height = 0;
+    private float height = 2;
     /** Horizontal offset from curve **/
     private float offset = 0;
+
 
     public Player(ModelInstance modelInstance, TrackGenerator trackGenerator) {
         this.modelInstance = modelInstance;
@@ -126,5 +127,9 @@ public class Player {
 
     public float getT() {
         return t;
+    }
+
+    public float getTotalDistance() {
+        return totalDistance;
     }
 }

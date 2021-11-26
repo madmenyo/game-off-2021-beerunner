@@ -52,7 +52,7 @@ public class TrackSection implements Disposable {
     public TrackSection(Bezier<Vector3> curve) {
         this.curve = curve;
         curveLength = curve.approxLength(500);
-        trackWidth = 10;
+        trackWidth = 60;
 
         createLookup(curve);
 
@@ -544,6 +544,13 @@ public class TrackSection implements Disposable {
                     vertSize, vertSize, vertSize);
         }
     }
-
      */
+
+    public float getTrackWidth() {
+        return trackWidth;
+    }
+
+    public Array<ModelInstance> getSideObjects() {
+        return sideObjects;
+    }
 }
