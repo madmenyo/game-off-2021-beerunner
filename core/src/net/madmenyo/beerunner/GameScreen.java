@@ -198,6 +198,21 @@ public class GameScreen extends ScreenAdapter {
             for (ModelInstance modelInstance : track.getSideObjects()){
                 modelBatch.render(modelInstance, environment);
             }
+
+
+
+            for (CollisionObject object : track.getCollisionObjects()){
+
+                if (player.getBounds().intersects(object.getBounds())){
+                    object.onCollision();
+
+                    System.out.println("Player: " + player.getBounds());
+                    System.out.println("Object: " + object.getBounds());
+                }
+                // Let the object handle drawing itself so it changes on state change
+                object.draw(modelBatch, environment);
+            }
+
         }
 
         for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
@@ -219,8 +234,24 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.setColor(Color.YELLOW);
         //player.getBounds().mul(player.getModelInstance().transform).getCorner000(tmp);
+
+        /*
+        for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
+            object.getBounds().getCorner000(tmp);
+            shapeRenderer.box(tmp.x, tmp.y, tmp.z, object.getBounds().getWidth(), object.getBounds().getHeight(), -object.getBounds().getDepth());
+
+            if (player.getBounds().intersects(object.getBounds())){
+                shapeRenderer.setColor(Color.RED);
+            }
+
+        }
+
         player.getBounds().getCorner000(tmp);
         shapeRenderer.box(tmp.x, tmp.y, tmp.z, player.getBounds().getWidth(), player.getBounds().getHeight(), -player.getBounds().getDepth());
+
+         */
+
+
 
         shapeRenderer.end();
 

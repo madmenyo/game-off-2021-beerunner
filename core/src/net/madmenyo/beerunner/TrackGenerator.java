@@ -79,7 +79,6 @@ public class TrackGenerator {
         // For now stay on current track and reset t
         previousSections.add(currentTrackSection);
         if (previousSections.size() > 3){
-            System.out.println("removing");
             previousSections.get(2).dispose();
             previousSections.remove(2);
         }
