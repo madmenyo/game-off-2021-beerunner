@@ -147,4 +147,12 @@ public class Player {
     public BoundingBox getBounds() {
         return bounds;
     }
+
+    public float getTotalEnergy() {
+        return totalEnergy;
+    }
+
+    public float getEnergy() {
+        return energy;
+    }
 }

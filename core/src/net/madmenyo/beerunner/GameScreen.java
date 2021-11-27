@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -19,10 +20,14 @@ import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import net.madmenyo.beerunner.gui.GuiStage;
 
 public class GameScreen extends ScreenAdapter {
 
@@ -37,6 +42,8 @@ public class GameScreen extends ScreenAdapter {
     private ModelBatch modelBatch;
 
     private AssetManager assetManager;
+
+    private GuiStage gui;
 
 
     // Tests, might need refactoring
@@ -81,14 +88,11 @@ public class GameScreen extends ScreenAdapter {
                 //.set(1f, 1f, 1f, 40.0f, -35f, -35f));
         environment.shadowMap = shadowLight;
 
-
-
-
-
         shadowBatch = new ModelBatch(new DepthShaderProvider());
         modelBatch = new ModelBatch();
 
         trackGenerator = new TrackGenerator(assetManager);
+
 
         /*
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -104,6 +108,9 @@ public class GameScreen extends ScreenAdapter {
         player = new Player(new ModelInstance(modelLoader.loadModel(Gdx.files.internal("models/bee.g3dj"))), trackGenerator);
 
         followCam = new FollowCam(camera, player, trackGenerator);
+
+
+        gui = new GuiStage(new ExtendViewport(1280, 720), spriteBatch, player, new Skin(Gdx.files.internal("gui/guiskin.json"), new TextureAtlas("gui/guiskin.atlas")));
 
         font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
     }
@@ -137,6 +144,9 @@ public class GameScreen extends ScreenAdapter {
         followCam.update(delta);
         player.update(delta);
         //trackGenerator.setCameraBehind(camera, player, shapeRenderer);
+
+        //Update gui after game logic update
+        gui.act();
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -190,8 +200,6 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
-
-
         for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
 
             if (player.getBounds().intersects(object.getBounds())){
@@ -200,56 +208,14 @@ public class GameScreen extends ScreenAdapter {
                 System.out.println("Player: " + player.getBounds());
                 System.out.println("Object: " + object.getBounds());
             }
+            // Let the object handle drawing itself so it changes on state change
             object.draw(modelBatch, environment);
-            //modelBatch.render(object.getModelInstance(), environment);
         }
-
-
 
         modelBatch.end();
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        /*
-
-        shapeRenderer.setColor(Color.WHITE);
-        // Debug drawing
-        trackGenerator.getCurrentTrackSection().drawCurve(shapeRenderer);
-        for (TrackSection ts : trackGenerator.getPreviousSections())
-        {
-            ts.drawCurve(shapeRenderer);
-
-            for (Vector3 p : ts.divideByLookup(10)){
-                drawBox(p, 1);
-            }
-        }
-
-        // Division of curves
-        for (Vector3 p : trackGenerator.getCurrentTrackSection().divideByLookup(10)){
-            drawBox(p, 1);
-        }
-
-        float t =  trackGenerator.getCurrentTrackSection().getCurve().approximate(tmp.set(0 , 0, -10));
-
-
-        shapeRenderer.setColor(Color.GREEN);
-        drawBox(trackGenerator.getCurrentTrackSection().getCurve().valueAt(tmp, t), 1);
-
-        shapeRenderer.setColor(Color.CYAN);
-        trackGenerator.getCurrentTrackSection().debugDrawVerts(shapeRenderer);
-
-        for (TrackSection ts : trackGenerator.getPreviousSections())
-        {
-            ts.debugDrawVerts(shapeRenderer);
-        }
-
-
-        shapeRenderer.setColor(Color.GREEN);
-        for (TrackSection ts : trackGenerator.getPreviousSections())
-        {
-            ts.debugDrawDerivative(shapeRenderer);
-        }
-         */
 
         shapeRenderer.setColor(Color.YELLOW);
         //player.getBounds().mul(player.getModelInstance().transform).getCorner000(tmp);
@@ -258,15 +224,7 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.end();
 
-        spriteBatch.begin();
-
-        //String formattedString = String.format("Distance: %.1f", (player.getTotalDistance() * .05f));
-        //font.draw(spriteBatch, formattedString, 10, 30);
-        font.draw(spriteBatch, "" + (int)(player.getTotalDistance() * .08f), 10, 30);
-
-        spriteBatch.end();
-
-
+        gui.draw();
     }
 
     @Override

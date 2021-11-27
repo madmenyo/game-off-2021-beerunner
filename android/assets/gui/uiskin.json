@@ -55,5 +55,20 @@ com.badlogic.gdx.scenes.scene2d.ui.Touchpad$TouchpadStyle: {
 },
 com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
 	default: { minus: tree-minus, plus: tree-plus, selection: default-select-selection }
-}
+},
+	com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
+		default: {
+
+		}
+		default-horizontal: {
+			background: progressbar,
+			knob: progressbar-filled,
+			knobBefore: progressbar-filled
+		},
+		default-vertical: {
+			background: progressbar-vertical,
+			knob: progressbar-filled-vertical,
+			knobBefore: progressbar-filled-vertical
+		}
+	}
 }
