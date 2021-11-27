@@ -6,7 +6,9 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
@@ -238,6 +240,9 @@ public class TrackSection implements Disposable {
     @Override
     public void dispose() {
         track.model.dispose();
+
+        // Currently there are spheres being generated that are not disposed. Eventually these will
+        // be models that are reused every track piece and only need disposing after level finished
     }
 
     private void generateMesh(float sectionDistance){
@@ -559,5 +564,27 @@ public class TrackSection implements Disposable {
 
     public Array<CollisionObject> getCollisionObjects() {
         return collisionObjects;
+    }
+
+    public void render(ModelBatch modelBatch, Environment environment){
+        // Render everything for now
+        modelBatch.render(track, environment);
+
+        for (ModelInstance mi : sideObjects){
+            modelBatch.render(mi, environment);
+        }
+
+        for (CollisionObject object : collisionObjects){
+            object.draw(modelBatch, environment);
+        }
+    }
+
+    public void handleCollisions(Player player){
+        for (CollisionObject object : collisionObjects){
+
+            if (player.getBounds().intersects(object.getBounds())){
+                object.onCollision();
+            }
+        }
     }
 }

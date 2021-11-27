@@ -24,7 +24,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import net.madmenyo.beerunner.gui.GuiStage;
@@ -148,86 +147,17 @@ public class GameScreen extends ScreenAdapter {
         //Update gui after game logic update
         gui.act();
 
+        // Handle collisions
+        trackCollision();
+
+
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 
-        //create shadow texture
-        shadowLight.begin(tmp.set(camera.position), camera.direction);
-        shadowBatch.begin(shadowLight.getCamera());
+        renderShadowPass();
 
-        shadowBatch.render(trackGenerator.getCurrentTrackSection().getTrack(), environment);
-        shadowBatch.render(player.getModelInstance(), environment);
-        shadowBatch.render(trackGenerator.getNextSection().getTrack(), environment);
-
-
-        for (ModelInstance modelInstance : trackGenerator.getCurrentTrackSection().getSideObjects()){
-            shadowBatch.render(modelInstance, environment);
-        }
-
-        for (ModelInstance modelInstance : trackGenerator.getNextSection().getSideObjects()){
-            shadowBatch.render(modelInstance, environment);
-        }
-
-        for (TrackSection track : trackGenerator.getPreviousSections()){
-            shadowBatch.render(track.getTrack(), environment);
-            for (ModelInstance modelInstance : track.getSideObjects()){
-                shadowBatch.render(modelInstance, environment);
-            }
-        }
-        //shadowBatch.render(instances);
-
-        shadowBatch.end();
-        shadowLight.end();
-
-        modelBatch.begin(camera);
-        modelBatch.render(trackGenerator.getCurrentTrackSection().getTrack(), environment);
-        modelBatch.render(player.getModelInstance(), environment);
-        modelBatch.render(trackGenerator.getNextSection().getTrack(), environment);
-
-        for (ModelInstance modelInstance : trackGenerator.getCurrentTrackSection().getSideObjects()){
-            modelBatch.render(modelInstance, environment);
-        }
-
-        for (ModelInstance modelInstance : trackGenerator.getNextSection().getSideObjects()){
-            modelBatch.render(modelInstance, environment);
-        }
-
-        for (TrackSection track : trackGenerator.getPreviousSections()){
-            modelBatch.render(track.getTrack(), environment);
-            for (ModelInstance modelInstance : track.getSideObjects()){
-                modelBatch.render(modelInstance, environment);
-            }
-
-
-
-            for (CollisionObject object : track.getCollisionObjects()){
-
-                if (player.getBounds().intersects(object.getBounds())){
-                    object.onCollision();
-
-                    System.out.println("Player: " + player.getBounds());
-                    System.out.println("Object: " + object.getBounds());
-                }
-                // Let the object handle drawing itself so it changes on state change
-                object.draw(modelBatch, environment);
-            }
-
-        }
-
-        for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
-
-            if (player.getBounds().intersects(object.getBounds())){
-                object.onCollision();
-
-                System.out.println("Player: " + player.getBounds());
-                System.out.println("Object: " + object.getBounds());
-            }
-            // Let the object handle drawing itself so it changes on state change
-            object.draw(modelBatch, environment);
-        }
-
-        modelBatch.end();
+        renderTrackPass();
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -256,6 +186,88 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.end();
 
         gui.draw();
+    }
+
+    private void renderTrackPass() {
+        modelBatch.begin(camera);
+        modelBatch.render(player.getModelInstance(), environment);
+
+        // Render tracks
+        // Render previous
+        for (TrackSection track : trackGenerator.getPreviousSections()) {
+            track.render(modelBatch, environment);
+        }
+
+        // render current
+        trackGenerator.getCurrentTrackSection().render(modelBatch, environment);
+
+        // render next
+        trackGenerator.getNextSection().render(modelBatch, environment);
+
+
+        /*
+            for (CollisionObject object : track.getCollisionObjects()){
+
+                if (player.getBounds().intersects(object.getBounds())){
+                    object.onCollision();
+
+                    System.out.println("Player: " + player.getBounds());
+                    System.out.println("Object: " + object.getBounds());
+                }
+                // Let the object handle drawing itself so it changes on state change
+                object.draw(modelBatch, environment);
+            }
+
+        }
+
+        for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
+
+            if (player.getBounds().intersects(object.getBounds())){
+                object.onCollision();
+
+                System.out.println("Player: " + player.getBounds());
+                System.out.println("Object: " + object.getBounds());
+            }
+            // Let the object handle drawing itself so it changes on state change
+            object.draw(modelBatch, environment);
+        }
+         */
+
+        modelBatch.end();
+    }
+
+    private void renderShadowPass() {
+        //create shadow texture
+        shadowLight.begin(tmp.set(camera.position), camera.direction);
+        shadowBatch.begin(shadowLight.getCamera());
+
+        shadowBatch.render(player.getModelInstance(), environment);
+        // Shadow Render tracks
+        // Render previous
+        for (TrackSection track : trackGenerator.getPreviousSections()){
+            track.render(shadowBatch, environment);
+        }
+
+        // render current
+        trackGenerator.getCurrentTrackSection().render(shadowBatch, environment);
+
+        // render next
+        trackGenerator.getNextSection().render(shadowBatch, environment);
+
+        shadowBatch.end();
+        shadowLight.end();
+    }
+
+    private void trackCollision() {
+        for (TrackSection track : trackGenerator.getPreviousSections()){
+            track.handleCollisions(player);
+        }
+
+        // render current
+        trackGenerator.getCurrentTrackSection().handleCollisions(player);
+
+        // render next
+        trackGenerator.getNextSection().handleCollisions(player);
     }
 
     @Override
