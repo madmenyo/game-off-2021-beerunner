@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 
 public class Player {
     private ModelInstance modelInstance;
@@ -20,6 +21,9 @@ public class Player {
 
 
     private float speed = 80;
+    private float totalEnergy = 100;
+    private float energy = totalEnergy;
+
 
 
     private float t = 0;
@@ -29,6 +33,7 @@ public class Player {
     /** Horizontal offset from curve **/
     private float offset = 0;
 
+    private BoundingBox bounds = new BoundingBox();
 
     public Player(ModelInstance modelInstance, TrackGenerator trackGenerator) {
         this.modelInstance = modelInstance;
@@ -77,6 +82,12 @@ public class Player {
         modelInstance.transform.translate(0, height, 0);
         trackGenerator.getCurrentTrackSection().getCurve().derivativeAt(derivative, t);
         modelInstance.transform.rotateTowardDirection(derivative.scl(-1), Vector3.Y);
+
+        // set new bounds
+        //modelInstance.calculateBoundingBox(bounds);
+        modelInstance.calculateBoundingBox(bounds);
+        bounds.mul(modelInstance.transform);
+
     }
 
     /**
@@ -131,5 +142,9 @@ public class Player {
 
     public float getTotalDistance() {
         return totalDistance;
+    }
+
+    public BoundingBox getBounds() {
+        return bounds;
     }
 }

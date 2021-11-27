@@ -1,10 +1,15 @@
 package net.madmenyo.beerunner;
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
@@ -13,6 +18,8 @@ import java.util.List;
 
 /**
  * Responsible for generating tracks on demand and keeping records.
+ *
+ * Code starting to get one huge mesh but only 3 days left... need... more... time...
  */
 public class TrackGenerator {
     private AssetManager assetManager;
@@ -25,7 +32,6 @@ public class TrackGenerator {
 
     private final List<TrackSection> previousSections = new ArrayList<>();
 
-    private final List<PathObject> pathObjects = new ArrayList<>();
 
 
     /** Total distance of previous tracks **/
@@ -36,14 +42,23 @@ public class TrackGenerator {
     private Vector3 tmp1 = new Vector3();
     private Vector3 tmp2 = new Vector3();
 
+
+    // ---
+
+    ModelBuilder modelBuilder = new ModelBuilder();
+
     public TrackGenerator(AssetManager assetManager) {
         this.assetManager = assetManager;
         curveGenerator = new SimpleCurveGenerator();
 
         currentTrackSection = new TrackSection(curveGenerator.getCurve());
-        placeObjects(currentTrackSection);
+        placeSideObjects(currentTrackSection);
+        placeCollisionObjects(currentTrackSection);
+
         nextSection = new TrackSection(curveGenerator.getCurve());
-        placeObjects(nextSection);
+        placeSideObjects(nextSection);
+
+        placeCollisionObjects(nextSection);
 
 
         // Dummy track section
@@ -71,8 +86,33 @@ public class TrackGenerator {
         currentTrackSection = nextSection;
         nextSection = new TrackSection(curveGenerator.getCurve());
 
-        placeObjects(nextSection);
+        placeSideObjects(nextSection);
+        placeCollisionObjects(nextSection);
+
         return 0f;
+    }
+
+    /**
+     * Hack in some object to dodge
+     * @param trackSection
+     */
+    private void placeCollisionObjects(TrackSection trackSection) {
+        modelBuilder.begin();
+        MeshPartBuilder meshBuilder;
+        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
+        SphereShapeBuilder.build(meshBuilder, 4, 4, 4, 12, 12);
+
+        ModelInstance instance = new ModelInstance(modelBuilder.end());
+        float t = trackSection.findT(100);
+
+        trackSection.getCurve().valueAt(tmp1, t);
+        tmp1.y += 6;
+        instance.transform.translate(tmp1);
+
+        Obstacle obstacle = new Obstacle(instance);
+
+
+        trackSection.getCollisionObjects().add(obstacle);
     }
 
 
@@ -80,7 +120,7 @@ public class TrackGenerator {
      * No more time left, just hack in some objects to give the world some live
      * @param track
      */
-    private void placeObjects(TrackSection track) {
+    private void placeSideObjects(TrackSection track) {
 
         // Left side
         for (float d = 0; d  < track.getCurve().approxLength(100); ) {
@@ -183,7 +223,5 @@ public class TrackGenerator {
 
     }
 
-    public List<PathObject> getPathObjects() {
-        return pathObjects;
-    }
+
 }

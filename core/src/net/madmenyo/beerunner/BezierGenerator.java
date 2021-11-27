@@ -11,7 +11,7 @@ public class BezierGenerator {
 
     private Bezier<Vector3> currentCurve = new Bezier<>();
 
-    private Array<Vector3> points = new Array();
+    private Array<Vector3> points = new Array<>();
 
     // Calculating V3's
     private Vector3 derivate = new Vector3();

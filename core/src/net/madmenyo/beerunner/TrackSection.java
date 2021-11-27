@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,8 @@ public class TrackSection implements Disposable {
     float[] verts;
 
     private Array<ModelInstance> sideObjects = new Array<>();
+
+    private Array<CollisionObject> collisionObjects = new Array<>();
 
     Vector3 position = new Vector3();
     Vector3 derivative = new Vector3();
@@ -552,5 +555,9 @@ public class TrackSection implements Disposable {
 
     public Array<ModelInstance> getSideObjects() {
         return sideObjects;
+    }
+
+    public Array<CollisionObject> getCollisionObjects() {
+        return collisionObjects;
     }
 }

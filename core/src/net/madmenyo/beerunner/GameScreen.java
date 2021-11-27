@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
@@ -193,8 +192,16 @@ public class GameScreen extends ScreenAdapter {
 
 
 
-        for (PathObject object : trackGenerator.getPathObjects()){
-            modelBatch.render(object.getModelInstance(), environment);
+        for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
+
+            if (player.getBounds().intersects(object.getBounds())){
+                object.onCollision();
+
+                System.out.println("Player: " + player.getBounds());
+                System.out.println("Object: " + object.getBounds());
+            }
+            object.draw(modelBatch, environment);
+            //modelBatch.render(object.getModelInstance(), environment);
         }
 
 
@@ -245,6 +252,9 @@ public class GameScreen extends ScreenAdapter {
          */
 
         shapeRenderer.setColor(Color.YELLOW);
+        //player.getBounds().mul(player.getModelInstance().transform).getCorner000(tmp);
+        player.getBounds().getCorner000(tmp);
+        shapeRenderer.box(tmp.x, tmp.y, tmp.z, player.getBounds().getWidth(), player.getBounds().getHeight(), -player.getBounds().getDepth());
 
         shapeRenderer.end();
 
