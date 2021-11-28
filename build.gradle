@@ -98,6 +98,9 @@ project(":html") {
         api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion:sources"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-gwt:$gdxControllersVersion"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-gwt:$gdxControllersVersion:sources"
+
+        //api 'net.dermetfan.libgdx-utils:libgdx-utils:0.7.2:sources'
+        //api 'net.dermetfan.libgdx-utils:libgdx-utils-box2d:0.7.2:sources'
         
     }
 }
