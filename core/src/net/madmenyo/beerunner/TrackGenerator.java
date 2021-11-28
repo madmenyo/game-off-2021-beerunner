@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Responsible for generating tracks on demand and keeping records.
@@ -52,13 +53,17 @@ public class TrackGenerator {
         curveGenerator = new SimpleCurveGenerator();
 
         currentTrackSection = new TrackSection(curveGenerator.getCurve());
+        // Ridiculously repetitively... :)
         placeSideObjects(currentTrackSection);
-        placeCollisionObjects(currentTrackSection);
+        //placeCollisionObjects(currentTrackSection);
+        placePickup(currentTrackSection);
+        placeEdges(currentTrackSection);
 
         nextSection = new TrackSection(curveGenerator.getCurve());
         placeSideObjects(nextSection);
-
-        placeCollisionObjects(nextSection);
+        //placeCollisionObjects(nextSection);
+        placePickup(nextSection);
+        placeEdges(nextSection);
 
 
         // Dummy track section
@@ -78,17 +83,65 @@ public class TrackGenerator {
     public float nextTrack() {
         // For now stay on current track and reset t
         previousSections.add(currentTrackSection);
-        if (previousSections.size() > 3){
-            previousSections.get(2).dispose();
-            previousSections.remove(2);
+        if (previousSections.size() > 2){
+            previousSections.get(1).dispose();
+            previousSections.remove(1);
         }
         currentTrackSection = nextSection;
         nextSection = new TrackSection(curveGenerator.getCurve());
 
         placeSideObjects(nextSection);
-        placeCollisionObjects(nextSection);
+        placeEdges(nextSection);
+        //placeCollisionObjects(nextSection);
+        placePickup(nextSection);
 
         return 0f;
+    }
+
+    /**
+     * Just add pickup flowers randomly
+     * @param track
+     */
+    private void placePickup(TrackSection track) {
+        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+
+            boolean rock = MathUtils.random(100) < 30;
+
+            d += MathUtils.random() * 60 + 2;
+
+            ModelInstance ml;
+            if (rock) {
+                ml = new ModelInstance(assetManager.get(Assets.rocks.get(MathUtils.random(Assets.rocks.size() - 1))));
+            } else
+            {
+                ml = new ModelInstance(assetManager.get(Assets.flowers.get(MathUtils.random(Assets.flowers.size() - 1))));
+            }
+            float t = track.findT(d);
+            track.getCurve().valueAt(tmp1, t);
+            track.getCurve().derivativeAt(tmp2, t);
+
+            tmp2.y = 0;
+            tmp2.nor();
+            if (MathUtils.random(100) < 50)
+                tmp2.rotate(Vector3.Y, 90);
+            else
+                tmp2.rotate(Vector3.Y, -90);
+
+            tmp2.scl(MathUtils.random(0, 10));
+            tmp1.add(tmp2);
+
+            ml.transform.translate(tmp1);
+            ml.transform.scl(MathUtils.random(.04f, .06f));
+            ml.transform.rotate(Vector3.Y, MathUtils.random(360));
+
+            CollisionObject co;
+            if (rock) {
+                co = new Obstacle(ml);
+            } else {
+                co = new Pickup(ml);
+            }
+            track.getCollisionObjects().add(co);
+        }
     }
 
     /**
@@ -168,6 +221,62 @@ public class TrackGenerator {
             track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
+    }
+
+    /**
+     * No more time left, just hack in some objects to give the world some live
+     * @param track
+     */
+    private void placeEdges(TrackSection track) {
+
+        // Left side
+        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+
+            d += MathUtils.random() * 5 + 10;
+
+            ModelInstance ml = new ModelInstance(assetManager.get(Assets.rocks.get(MathUtils.random(Assets.rocks.size() - 1))));
+            float t = track.findT(d);
+            track.getCurve().valueAt(tmp1, t);
+            track.getCurve().derivativeAt(tmp2, t);
+
+            tmp2.y = 0;
+            tmp2.nor();
+            tmp2.rotate(Vector3.Y, 90);
+            tmp2.scl(MathUtils.random(40, 45));
+            tmp1.add(tmp2);
+
+            ml.transform.translate(tmp1);
+            ml.transform.scl(MathUtils.random(.09f, .13f), MathUtils.random(.09f, .22f), MathUtils.random(.09f, .13f));
+            ml.transform.rotate(Vector3.Y, MathUtils.random(360));
+
+            track.getSideObjects().add(ml);
+            //pathObjects.add(new PathObject(ml));
+        }
+
+        // right side
+        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+
+            d += MathUtils.random() * 3 + 6;
+
+            ModelInstance ml = new ModelInstance(assetManager.get(Assets.rocks.get(MathUtils.random(Assets.rocks.size() - 1))));
+            float t = track.findT(d);
+            track.getCurve().valueAt(tmp1, t);
+            track.getCurve().derivativeAt(tmp2, t);
+
+            tmp2.y = 0;
+            tmp2.nor();
+            tmp2.rotate(Vector3.Y, -90);
+            tmp2.scl(MathUtils.random(40, 45));
+            tmp1.add(tmp2);
+
+            ml.transform.translate(tmp1);
+            ml.transform.scl(MathUtils.random(.09f, .13f), MathUtils.random(.09f, .22f), MathUtils.random(.09f, .13f));
+            ml.transform.rotate(Vector3.Y, MathUtils.random(360));
+
+            track.getSideObjects().add(ml);
+            //pathObjects.add(new PathObject(ml));
+        }
+
     }
 
 

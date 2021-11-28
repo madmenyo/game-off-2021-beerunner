@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 
 public class Obstacle extends CollisionObject{
 
-    private boolean collided;
 
     public Obstacle(ModelInstance modelInstance) {
         super(modelInstance);
@@ -14,15 +13,14 @@ public class Obstacle extends CollisionObject{
 
     @Override
     public void draw(ModelBatch modelBatch, Environment environment) {
-        if (collided) return;
         modelBatch.render(modelInstance, environment);
     }
 
     @Override
-    public void onCollision() {
+    public void onCollision(Player player) {
         // should crash and lose life or game over
-        if (collided) return;
-        collided = true;
+        player.bump();
+
         System.out.println("Hit obstacle!");
 
     }

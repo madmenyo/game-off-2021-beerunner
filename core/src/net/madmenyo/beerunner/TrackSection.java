@@ -583,7 +583,7 @@ public class TrackSection implements Disposable {
         for (CollisionObject object : collisionObjects){
 
             if (player.getBounds().intersects(object.getBounds())){
-                object.onCollision();
+                object.onCollision(player);
             }
         }
     }

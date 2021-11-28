@@ -44,7 +44,7 @@ public class GuiStage extends Stage {
         table.setFillParent(true);
         table.left().top();
 
-        table.debugAll();
+        //table.debugAll();
 
         table.add(distance).expandX().left().row();
         table.add(energyBar).width(getWidth() * .2f).height(40).left().row();
@@ -55,6 +55,7 @@ public class GuiStage extends Stage {
     public void act() {
         super.act();
 
+        honey.setText("Flowers: " + player.getFlowers());
         distance.setText("Distance: " + (int)player.getTotalDistance());
         energyBar.setValue(player.getEnergy());
     }

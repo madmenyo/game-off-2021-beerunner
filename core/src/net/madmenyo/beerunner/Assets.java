@@ -6,6 +6,7 @@ import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.JsonReader;
@@ -17,12 +18,13 @@ import java.util.List;
 public class Assets {
 
     public static final List<AssetDescriptor<Model>> trees = new ArrayList<>();
-
+    public static final List<AssetDescriptor<Model>> rocks = new ArrayList<>();
+    public static final List<AssetDescriptor<Model>> flowers = new ArrayList<>();
+    
     private AssetManager assetManager = new AssetManager();
 
 
     public void load(){
-
 
         for (FileHandle file : Gdx.files.internal("models/trees").list()){
 
@@ -32,6 +34,26 @@ public class Assets {
             assetManager.load(treeDescriptor);
             trees.add(treeDescriptor);
         }
+
+        for (FileHandle file : Gdx.files.internal("models/rocks").list()){
+
+            if (file.file().getName().endsWith("png")) continue;
+
+            AssetDescriptor<Model> rockDescriptor = new AssetDescriptor<>(file, Model.class);
+            assetManager.load(rockDescriptor);
+            rocks.add(rockDescriptor);
+        }
+
+        for (FileHandle file : Gdx.files.internal("models/flowers").list()){
+
+            if (file.file().getName().endsWith("png")) continue;
+
+            AssetDescriptor<Model> rockDescriptor = new AssetDescriptor<>(file, Model.class);
+            assetManager.load(rockDescriptor);
+            flowers.add(rockDescriptor);
+        }
+
+
         assetManager.finishLoading();
     }
 

@@ -20,10 +20,11 @@ public class Player {
     private TrackGenerator trackGenerator;
 
 
-    private float speed = 80;
+    private float speed = 60;
     private float totalEnergy = 100;
     private float energy = totalEnergy;
 
+    private int flowers = 0;
 
 
     private float t = 0;
@@ -96,12 +97,12 @@ public class Player {
      */
     private void controlls(float delta) {
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            offset -= 15 * delta;
+            offset -= 25 * delta;
 
         } else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            offset += 15 * delta;
+            offset += 25 * delta;
         }
-        MathUtils.clamp(offset, -5, 5);
+        offset = MathUtils.clamp(offset, -16, 16);
     }
 
     public ModelInstance getModelInstance() {
@@ -154,5 +155,20 @@ public class Player {
 
     public float getEnergy() {
         return energy;
+    }
+
+    public void addFlower(){
+        flowers++;
+    }
+
+    /**
+     * Called when bumped into a obstacle
+     */
+    public void bump() {
+
+    }
+
+    public int getFlowers() {
+        return flowers;
     }
 }

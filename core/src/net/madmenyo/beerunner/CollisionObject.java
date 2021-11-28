@@ -31,7 +31,7 @@ public abstract class CollisionObject {
         return modelInstance;
     }
 
-    public abstract void onCollision();
+    public abstract void onCollision(Player player);
 
     public abstract void draw(ModelBatch modelBatch, Environment environment);
 
