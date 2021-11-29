@@ -3,7 +3,6 @@ package net.madmenyo.beerunner.gui;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -22,7 +21,8 @@ public class GuiStage extends Stage {
     // flying higher time (and shooting if I can hack it in in time) costs energy which renews
     // slowly automaticaly and by picking up flowers
     //private Label energy;
-    private ProgressBar energyBar;
+    //private ProgressBar energyBar;
+    private EnergyBar energyBar;
 
     // Some form of currency in game?
     private Label honey;
@@ -37,7 +37,8 @@ public class GuiStage extends Stage {
 
 
         distance = new Label("Distance:", skin);
-        energyBar = new ProgressBar(0, player.getMaxEnergy(), 1, false, skin);
+        //energyBar = new ProgressBar(0, player.getMaxEnergy(), 1, false, skin);
+        energyBar = new EnergyBar(skin, player);
         honey = new Label("Honey: ", skin);
 
         addActor(table);
@@ -47,7 +48,7 @@ public class GuiStage extends Stage {
         //table.debugAll();
 
         table.add(distance).expandX().left().row();
-        table.add(energyBar).width(getWidth() * .2f).height(40).left().row();
+        table.add(energyBar).width(getWidth() * .2f).height(18).left().row();
         table.add(honey).expandX().left();
     }
 
@@ -57,6 +58,6 @@ public class GuiStage extends Stage {
 
         honey.setText("Flowers: " + player.getFlowers());
         distance.setText("Distance: " + (int)player.getTotalDistance());
-        energyBar.setValue(player.getEnergy());
+        //energyBar.setValue(player.getEnergy());
     }
 }

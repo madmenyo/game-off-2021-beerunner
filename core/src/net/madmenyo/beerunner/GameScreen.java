@@ -191,7 +191,7 @@ public class GameScreen extends ScreenAdapter {
         followCam = new FollowCam(camera, player, trackGenerator);
 
 
-        gui = new GuiStage(new ExtendViewport(1280, 720), spriteBatch, player, new Skin(Gdx.files.internal("gui/guiskin.json"), new TextureAtlas("gui/guiskin.atlas")));
+        gui = new GuiStage(new ExtendViewport(1280, 720), spriteBatch, player, new Skin(Gdx.files.internal("gui/guiskin.json"), new TextureAtlas("gui/skin.atlas")));
 
         font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
     }

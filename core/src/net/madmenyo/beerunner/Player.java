@@ -31,9 +31,11 @@ public class Player {
     private float flyCost = 10;
 
     private float maxEnergy = 50;
+    private float energyTreshHold = 10;
+    private boolean depleted;
     private float energy = maxEnergy;
 
-    private float energyRegen = 3;
+    private float energyRegen = 1;
 
     private int flowers = 0;
 
@@ -135,14 +137,21 @@ public class Player {
         }
         offset = MathUtils.clamp(offset, -16, 16);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && energy > 0 && !depleted){
             height += flySpeed * delta;
             height = MathUtils.clamp(height, minHeight, maxHeight);
 
             energy -= flyCost * delta;
             energy = MathUtils.clamp(energy, 0, maxEnergy);
 
+            if (energy == 0){
+                depleted = true;
+            }
+
         } else {
+            if (depleted){
+                depleted = energy < energyTreshHold;
+            }
             height -= 20 * delta;
             height = MathUtils.clamp(height, minHeight, maxHeight);
 
@@ -191,6 +200,14 @@ public class Player {
 
     public float getEnergy() {
         return energy;
+    }
+
+    public boolean isDepleted() {
+        return depleted;
+    }
+
+    public float getEnergyTreshHold() {
+        return energyTreshHold;
     }
 
     public void addFlower(){
