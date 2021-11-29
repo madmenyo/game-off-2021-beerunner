@@ -4,9 +4,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Array;
 
 import net.madmenyo.beerunner.Player;
+
 
 public class EnergyBar extends Actor {
 
@@ -23,6 +27,7 @@ public class EnergyBar extends Actor {
 
         fill  = skin.getPatch("white");
         frame = skin.getPatch("frame");
+
 
     }
 

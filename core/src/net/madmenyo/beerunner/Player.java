@@ -30,6 +30,9 @@ public class Player {
     private float flySpeed = 25;
     private float flyCost = 10;
 
+    private int maxLives = 3;
+    private int lives = maxLives;
+
     private float maxEnergy = 50;
     private float energyTreshHold = 10;
     private boolean depleted;
@@ -194,6 +197,14 @@ public class Player {
         return bounds;
     }
 
+    public int getMaxLives() {
+        return maxLives;
+    }
+
+    public int getLives() {
+        return lives;
+    }
+
     public float getMaxEnergy() {
         return maxEnergy;
     }
@@ -204,10 +215,6 @@ public class Player {
 
     public boolean isDepleted() {
         return depleted;
-    }
-
-    public float getEnergyTreshHold() {
-        return energyTreshHold;
     }
 
     public void addFlower(){
@@ -221,6 +228,7 @@ public class Player {
         tAccelaration = 0;
         fromSpeed = -speed * .8f;
         speed = fromSpeed;
+        lives -= 1;
     }
 
     public int getFlowers() {

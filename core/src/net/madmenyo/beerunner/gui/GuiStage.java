@@ -2,9 +2,12 @@ package net.madmenyo.beerunner.gui;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import net.madmenyo.beerunner.Player;
@@ -29,11 +32,19 @@ public class GuiStage extends Stage {
 
     private Player player;
 
+    private Array<Image> hearts = new Array<>();
+
+    private Drawable heart;
+    private Drawable damage;
+
+
     public GuiStage(Viewport viewport, Batch batch, Player player, Skin skin) {
         super(viewport, batch);
         this.player = player;
         this.skin = skin;
 
+        heart = skin.getDrawable("heart");
+        damage = skin.getDrawable("heart_out");
 
 
         distance = new Label("Distance:", skin);
@@ -45,9 +56,20 @@ public class GuiStage extends Stage {
         table.setFillParent(true);
         table.left().top();
 
+        table.padLeft(10);
+
         //table.debugAll();
 
         table.add(distance).expandX().left().row();
+
+
+        Table healthBar = new Table();
+        table.add(healthBar).left().expandX().row();
+        for (int i = 0; i < player.getMaxLives(); i++) {
+            Image heart = new Image(skin.getDrawable("heart"));
+            healthBar.add(heart).pad(2).size(18);
+            hearts.add(heart);
+        }
         table.add(energyBar).width(getWidth() * .2f).height(18).left().row();
         table.add(honey).expandX().left();
     }
@@ -59,5 +81,13 @@ public class GuiStage extends Stage {
         honey.setText("Flowers: " + player.getFlowers());
         distance.setText("Distance: " + (int)player.getTotalDistance());
         //energyBar.setValue(player.getEnergy());
+
+        for (int i = 0; i < player.getMaxLives(); i++) {
+            System.out.println(player.getLives());
+            if (i < player.getLives()) hearts.get(i).setDrawable(heart);
+            else hearts.get(i).setDrawable(damage);
+
+        }
+
     }
 }
