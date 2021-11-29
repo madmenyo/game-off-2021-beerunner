@@ -48,7 +48,7 @@ public class GuiStage extends Stage {
 
         table.add(distance).expandX().left().row();
         table.add(energyBar).width(getWidth() * .2f).height(40).left().row();
-        table.add(honey).expand().expandX().left();
+        table.add(honey).expandX().left();
     }
 
     @Override
