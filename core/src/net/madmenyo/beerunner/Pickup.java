@@ -13,6 +13,11 @@ public class Pickup extends CollisionObject{
     }
 
     @Override
+    public void update(float delta) {
+
+    }
+
+    @Override
     public void draw(ModelBatch modelBatch, Environment environment) {
         if (pickedUp) return;
         modelBatch.render(modelInstance, environment);

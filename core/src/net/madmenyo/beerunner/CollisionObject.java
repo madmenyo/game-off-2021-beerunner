@@ -20,13 +20,14 @@ public abstract class CollisionObject {
         this.modelInstance = modelInstance;
 
         modelInstance.calculateBoundingBox(bounds);
+
+        // Resize bounds
         bounds.min.x += (bounds.max.x - bounds.min.x) * .25f;
         bounds.max.x -= (bounds.max.x - bounds.min.x) * .25f;
         bounds.min.z += (bounds.max.z - bounds.min.z) * .25f;
         bounds.max.z -= (bounds.max.z - bounds.min.z) * .25f;
 
-        System.out.println("min: " + bounds.min);
-        System.out.println("max: " + bounds.max);
+        // set to transform
         bounds.mul(modelInstance.transform);
     }
 
@@ -40,6 +41,8 @@ public abstract class CollisionObject {
     }
 
     public abstract void onCollision(Player player);
+
+    public abstract void update(float delta);
 
     public abstract void draw(ModelBatch modelBatch, Environment environment);
 

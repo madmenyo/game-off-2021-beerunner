@@ -37,7 +37,8 @@ public class Assets {
                 assetManager.load(treeDescriptor);
                 trees.add(treeDescriptor);
             } catch (GdxRuntimeException e){
-                System.out.println(e.getMessage());
+                // This skips the PNG
+                //System.out.println(e.getMessage());
             }
         }
 
@@ -51,7 +52,8 @@ public class Assets {
                 assetManager.load(rockDescriptor);
                 rocks.add(rockDescriptor);
             } catch (GdxRuntimeException e){
-                System.out.println(e.getMessage());
+                // This skips the PNG
+                //System.out.println(e.getMessage());
             }
         }
 
@@ -63,7 +65,8 @@ public class Assets {
                 assetManager.load(rockDescriptor);
                 flowers.add(rockDescriptor);
             } catch (GdxRuntimeException e){
-                System.out.println(e.getMessage());
+                // This skips the PNG
+                //System.out.println(e.getMessage());
             }
         }
 

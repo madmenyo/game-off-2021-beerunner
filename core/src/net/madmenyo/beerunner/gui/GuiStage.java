@@ -37,7 +37,7 @@ public class GuiStage extends Stage {
 
 
         distance = new Label("Distance:", skin);
-        energyBar = new ProgressBar(0, player.getTotalEnergy(), 1, false, skin);
+        energyBar = new ProgressBar(0, player.getMaxEnergy(), 1, false, skin);
         honey = new Label("Honey: ", skin);
 
         addActor(table);

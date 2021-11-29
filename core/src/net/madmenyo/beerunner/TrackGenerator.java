@@ -15,7 +15,6 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Responsible for generating tracks on demand and keeping records.
@@ -131,7 +130,8 @@ public class TrackGenerator {
             tmp1.add(tmp2);
 
             ml.transform.translate(tmp1);
-            ml.transform.scl(MathUtils.random(.04f, .06f));
+            if (rock) ml.transform.scl(MathUtils.random(.04f, .06f));
+            else ml.transform.scl(MathUtils.random(.08f, .12f));
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
             CollisionObject co;
@@ -304,7 +304,7 @@ public class TrackGenerator {
         shapeRenderer.box(v3.x, v3.y, v3.z, 1, 1, 1);
          */
 
-        float t = player.getT();
+        float t = player.gettCurve();
         t -= .2f;
 
         Vector3 v3 = new Vector3();

@@ -227,6 +227,10 @@ public class GameScreen extends ScreenAdapter {
         envMap.transform.set(camera.position, new Quaternion(), new Vector3(500, 500, 500) );
         //trackGenerator.setCameraBehind(camera, player, shapeRenderer);
 
+        for (CollisionObject colObjects : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
+            colObjects.update(delta);
+        }
+
         //Update gui after game logic update
         gui.act();
 
@@ -259,13 +263,13 @@ public class GameScreen extends ScreenAdapter {
         //player.getBounds().mul(player.getModelInstance().transform).getCorner000(tmp);
         shapeRenderer.setColor(Color.YELLOW);
         for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
-            object.drawBounds(shapeRenderer);
+            //object.drawBounds(shapeRenderer);
             //object.getBounds().getCorner000(tmp);
             //shapeRenderer.box(tmp.x, tmp.y, tmp.z, object.getBounds().getWidth(), object.getBounds().getHeight(), -object.getBounds().getDepth());
 
             if (player.getBounds().intersects(object.getBounds())){
-                System.out.println("Hit obstacle!");
-                hit = true;
+                if (object instanceof Obstacle && !((Obstacle)object).isHit())
+                    hit = true;
             }
 
         }
