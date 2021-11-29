@@ -2,7 +2,9 @@ package net.madmenyo.beerunner;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
@@ -29,12 +31,19 @@ public class Player {
 
     private float t = 0;
 
-    /** Height offset from curve **/
-    private float height = 2;
     /** Horizontal offset from curve **/
     private float offset = 0;
 
+    private final float minHeight = 2;
+    private final float maxHeight = 6;
+    /** Height offset from curve **/
+    private float height = minHeight;
+
+    /** Down force per second when flight is not used or energy depleted**/
+    private float downForce = 1f;
+
     private BoundingBox bounds = new BoundingBox();
+
 
     public Player(ModelInstance modelInstance, TrackGenerator trackGenerator) {
         this.modelInstance = modelInstance;
@@ -86,13 +95,12 @@ public class Player {
 
         // set new bounds
         //modelInstance.calculateBoundingBox(bounds);
-        modelInstance.calculateBoundingBox(bounds);
-        bounds.mul(modelInstance.transform);
+        setBounds();
 
     }
 
     /**
-     * Crude controls, should clamp offset to track width
+     * Crude controls, clamping offset to track width
      * @param delta
      */
     private void controlls(float delta) {
@@ -103,35 +111,13 @@ public class Player {
             offset += 25 * delta;
         }
         offset = MathUtils.clamp(offset, -16, 16);
+
     }
 
     public ModelInstance getModelInstance() {
         return modelInstance;
     }
 
-    /*
-    public void drawCurve(ShapeRenderer shapeRenderer){
-
-        Vector3 prev = new Vector3();
-
-        Vector3 cur = new Vector3();
-
-        System.out.println(currentCurve.points.get(0));
-
-        currentCurve.valueAt(prev, 0);
-
-        for (int i = 1; i <= 100; i++){
-            currentCurve.valueAt(cur, i / 100f);
-
-
-
-            shapeRenderer.setColor(Color.BLUE);
-            shapeRenderer.line(prev.x, prev.y, prev.z,
-                    cur.x, cur.y, cur.z);
-            prev.set(cur);
-
-        }
-    }*/
 
     public Vector3 getPosition() {
         return position;
@@ -143,6 +129,17 @@ public class Player {
 
     public float getTotalDistance() {
         return totalDistance;
+    }
+
+    public void setBounds() {
+        modelInstance.calculateBoundingBox(bounds);
+        bounds.min.x += 1.4f;
+        bounds.max.x -= 1.4f;
+        bounds.min.z += 1.4f;
+        bounds.max.z -= 1.4f;
+        bounds.mul(modelInstance.transform);
+
+
     }
 
     public BoundingBox getBounds() {
@@ -170,5 +167,9 @@ public class Player {
 
     public int getFlowers() {
         return flowers;
+    }
+
+    public void drawBounds(ShapeRenderer renderer){
+        renderer.box(bounds.getCenterX() - bounds.getWidth() / 2, bounds.getCenterY() - bounds.getHeight() / 2, bounds.getCenterZ() + bounds.getDepth() / 2, bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
     }
 }

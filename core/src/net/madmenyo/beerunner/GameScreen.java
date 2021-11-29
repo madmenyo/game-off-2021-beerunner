@@ -254,20 +254,29 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        shapeRenderer.setColor(Color.YELLOW);
-        //player.getBounds().mul(player.getModelInstance().transform).getCorner000(tmp);
+        boolean hit = false;
 
-        /*
+        //player.getBounds().mul(player.getModelInstance().transform).getCorner000(tmp);
+        shapeRenderer.setColor(Color.YELLOW);
         for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
-            object.getBounds().getCorner000(tmp);
-            shapeRenderer.box(tmp.x, tmp.y, tmp.z, object.getBounds().getWidth(), object.getBounds().getHeight(), -object.getBounds().getDepth());
+            object.drawBounds(shapeRenderer);
+            //object.getBounds().getCorner000(tmp);
+            //shapeRenderer.box(tmp.x, tmp.y, tmp.z, object.getBounds().getWidth(), object.getBounds().getHeight(), -object.getBounds().getDepth());
 
             if (player.getBounds().intersects(object.getBounds())){
-                shapeRenderer.setColor(Color.RED);
+                System.out.println("Hit obstacle!");
+                hit = true;
             }
 
         }
 
+        if (hit) shapeRenderer.setColor(Color.RED);
+        else {
+            shapeRenderer.setColor(Color.GREEN);
+        }
+        player.drawBounds(shapeRenderer);
+
+        /*
         player.getBounds().getCorner000(tmp);
         shapeRenderer.box(tmp.x, tmp.y, tmp.z, player.getBounds().getWidth(), player.getBounds().getHeight(), -player.getBounds().getDepth());
 

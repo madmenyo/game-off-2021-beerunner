@@ -1,5 +1,6 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -19,6 +20,13 @@ public abstract class CollisionObject {
         this.modelInstance = modelInstance;
 
         modelInstance.calculateBoundingBox(bounds);
+        bounds.min.x += (bounds.max.x - bounds.min.x) * .25f;
+        bounds.max.x -= (bounds.max.x - bounds.min.x) * .25f;
+        bounds.min.z += (bounds.max.z - bounds.min.z) * .25f;
+        bounds.max.z -= (bounds.max.z - bounds.min.z) * .25f;
+
+        System.out.println("min: " + bounds.min);
+        System.out.println("max: " + bounds.max);
         bounds.mul(modelInstance.transform);
     }
 
@@ -38,4 +46,5 @@ public abstract class CollisionObject {
     public BoundingBox getBounds() {
         return bounds;
     }
+
 }

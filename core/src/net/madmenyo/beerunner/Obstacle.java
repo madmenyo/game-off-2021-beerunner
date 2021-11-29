@@ -21,7 +21,5 @@ public class Obstacle extends CollisionObject{
         // should crash and lose life or game over
         player.bump();
 
-        System.out.println("Hit obstacle!");
-
     }
 }
