@@ -10,11 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import net.madmenyo.beerunner.Assets;
+import net.madmenyo.beerunner.BeeRunner;
 import net.madmenyo.beerunner.Player;
 
 public class GuiStage extends Stage {
 
     private Skin skin;
+    private BeeRunner beeRunner;
 
     Table table = new Table();
 
@@ -37,11 +40,14 @@ public class GuiStage extends Stage {
     private Drawable heart;
     private Drawable damage;
 
+    private GameOverTable gameOverTable;
 
-    public GuiStage(Viewport viewport, Batch batch, Player player, Skin skin) {
+
+    public GuiStage(Viewport viewport, Batch batch, Player player, BeeRunner beeRunner) {
         super(viewport, batch);
         this.player = player;
-        this.skin = skin;
+        this.skin = beeRunner.assetManager.get(Assets.skin);
+        this.beeRunner = beeRunner;
 
         heart = skin.getDrawable("heart");
         damage = skin.getDrawable("heart_out");
@@ -72,7 +78,14 @@ public class GuiStage extends Stage {
         }
         table.add(energyBar).width(getWidth() * .2f).height(18).left().row();
         table.add(honey).expandX().left();
+
+        gameOverTable = new GameOverTable(skin, player, beeRunner);
+        addActor(gameOverTable);
+        gameOverTable.setFillParent(true);
+        gameOverTable.setVisible(false);
     }
+
+    private boolean gameOver = false;
 
     @Override
     public void act() {
@@ -83,11 +96,14 @@ public class GuiStage extends Stage {
         //energyBar.setValue(player.getEnergy());
 
         for (int i = 0; i < player.getMaxLives(); i++) {
-            System.out.println(player.getLives());
             if (i < player.getLives()) hearts.get(i).setDrawable(heart);
             else hearts.get(i).setDrawable(damage);
 
         }
 
+        if (!gameOver && player.getLives() <= 0){
+            gameOver = true;
+            gameOverTable.show();
+        }
     }
 }

@@ -90,6 +90,57 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
 
+        Cubemap cubemap = getCubemap();
+
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f),
+                new CubemapAttribute(CubemapAttribute.EnvironmentMap,  cubemap));
+
+        //DirectionalLight light = new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f);
+        /*
+        shadowLight = new DirectionalShadowLight(
+                1048, 1048,
+                viewport.getWorldWidth(), viewport.getWorldHeight(),
+                1, 300);
+         */
+
+        environment.add((shadowLight = new DirectionalShadowLight(2048, 2048,
+                600, 600,
+                .1f, 2000f))
+                .set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+                //.set(1f, 1f, 1f, 40.0f, -35f, -35f));
+        environment.shadowMap = shadowLight;
+
+
+
+        shadowBatch = new ModelBatch(new DepthShaderProvider());
+        modelBatch = new ModelBatch();
+
+        trackGenerator = new TrackGenerator(beeRunner.assetManager);
+
+
+        /*
+        ModelBuilder modelBuilder = new ModelBuilder();
+        modelBuilder.begin();
+        MeshPartBuilder meshBuilder;
+        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
+        SphereShapeBuilder.build(meshBuilder, 2, 1, 2, 16, 12);
+        player = new Player(new ModelInstance(modelBuilder.end()), trackGenerator);
+
+         */
+
+        G3dModelLoader modelLoader = new G3dModelLoader(new JsonReader());
+        player = new Player(new ModelInstance(modelLoader.loadModel(Gdx.files.internal("models/bee.g3dj"))), trackGenerator);
+
+        followCam = new FollowCam(camera, player, trackGenerator);
+
+
+        gui = new GuiStage(new ExtendViewport(1280, 720), spriteBatch, player, beeRunner);
+
+        font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
+    }
+
+    private Cubemap getCubemap() {
         int attr = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
         mb.begin();
         mb.part("front", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(new Texture("models/cubemap/front.png"))))
@@ -154,53 +205,7 @@ public class GameScreen extends ScreenAdapter {
                 Gdx.files.internal("models/cubemap/back.png"),
                 Gdx.files.internal("models/cubemap/front.png")
         );
-
-        environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f),
-                new CubemapAttribute(CubemapAttribute.EnvironmentMap,  cubemap));
-
-        //DirectionalLight light = new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f);
-        /*
-        shadowLight = new DirectionalShadowLight(
-                1048, 1048,
-                viewport.getWorldWidth(), viewport.getWorldHeight(),
-                1, 300);
-         */
-
-        environment.add((shadowLight = new DirectionalShadowLight(2048, 2048,
-                600, 600,
-                .1f, 2000f))
-                .set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
-                //.set(1f, 1f, 1f, 40.0f, -35f, -35f));
-        environment.shadowMap = shadowLight;
-
-
-
-        shadowBatch = new ModelBatch(new DepthShaderProvider());
-        modelBatch = new ModelBatch();
-
-        trackGenerator = new TrackGenerator(beeRunner.assetManager);
-
-
-        /*
-        ModelBuilder modelBuilder = new ModelBuilder();
-        modelBuilder.begin();
-        MeshPartBuilder meshBuilder;
-        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
-        SphereShapeBuilder.build(meshBuilder, 2, 1, 2, 16, 12);
-        player = new Player(new ModelInstance(modelBuilder.end()), trackGenerator);
-
-         */
-
-        G3dModelLoader modelLoader = new G3dModelLoader(new JsonReader());
-        player = new Player(new ModelInstance(modelLoader.loadModel(Gdx.files.internal("models/bee.g3dj"))), trackGenerator);
-
-        followCam = new FollowCam(camera, player, trackGenerator);
-
-
-        gui = new GuiStage(new ExtendViewport(1280, 720), spriteBatch, player, new Skin(Gdx.files.internal("gui/guiskin.json"), new TextureAtlas("gui/skin.atlas")));
-
-        font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
+        return cubemap;
     }
 
 
@@ -215,7 +220,10 @@ public class GameScreen extends ScreenAdapter {
         beeRunner.gameMusic.setPosition(0);
         beeRunner.gameMusic.setVolume(.6f);
         beeRunner.gameMusic.play();
+
+        Gdx.input.setInputProcessor(gui);
     }
+
 
     private void setCamera() {
         camera.position.set(0, 5, -10);

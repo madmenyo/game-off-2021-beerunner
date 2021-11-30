@@ -1,6 +1,7 @@
 {
   BitmapFont: {
     default-font: { file: default.fnt },
+    def: { file: def.fnt },
     main-font: { file: mainfont.fnt },
     small-font: { file: small.fnt }
   },
@@ -10,6 +11,7 @@
     red: { a: 1, b: 0, g: 0, r: 1 },
     dark: { r: .25, g: .2, b: .05, a: 1 },
     black: { a: 1, b: 0, g: 0, r: 0 },
+    bee: {r: 0.851, g: 0.898, b: 0.11, a: 1}
   },
   TintedDrawable: {
     dialogDim: { name: white, color: { r: 0, g: 0, b: 0, a: 0.45 } },
@@ -21,7 +23,9 @@
   TextButtonStyle: {
     default: { down: default-round-down, up: default-round, font: default-font, fontColor: white },
     toggle: { down: default-round-down, up: default-round, checked: default-round-down, font: default-font, fontColor: white, downFontColor: red },
-    main: { up: mainbutton, down: mainbutton, font: main-font}
+    main: { up: mainbutton, down: mainbutton, font: main-font},
+    button: { up: button, font: main-font }
+
   },
   ScrollPaneStyle: {
     default: { vScroll: default-scroll, hScrollKnob: default-round-large, background: default-rect, hScroll: default-scroll, vScrollKnob: default-round-large }
@@ -50,8 +54,9 @@
     default-vertical: { background: default-slider, knob: default-round-large }
   },
   LabelStyle: {
-    default: { font: default-font, fontColor: white },
-    dark: { font: small-font, fontColor: dark, background: box_light }
+    default: { font: def, fontColor: white },
+    dark: { font: def, fontColor: dark},
+    title: { font: main-font }
   },
   TextFieldStyle: {
     default: { selection: selection, background: textfield, font: default-font, fontColor: white, cursor: cursor }

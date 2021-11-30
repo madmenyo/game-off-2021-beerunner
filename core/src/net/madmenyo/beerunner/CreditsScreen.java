@@ -43,7 +43,7 @@ public class CreditsScreen extends ScreenAdapter {
         addCredit(" Wooden button backgrounds ", " https://nl.freepik.com/vectoren/pijl ", mainTable);
 
         TextButton backButton = new TextButton("Back", skin, "main");
-        mainTable.add(backButton).padTop(50);
+        mainTable.add(backButton).colspan(2).padTop(50);
         backButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {

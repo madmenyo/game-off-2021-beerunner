@@ -31,7 +31,7 @@ public class Player {
     private float flyCost = 10;
 
     private int maxLives = 3;
-    private int lives = maxLives;
+    private int lives = 1;
 
     private float maxEnergy = 50;
     private float energyTreshHold = 10;
@@ -79,6 +79,8 @@ public class Player {
      * @param delta
      */
     private void movement(float delta) {
+        if (lives <= 0) return;
+
         // If bumped we need acceleration
         if (speed < maxSpeed){
             if (tAccelaration >= 1){
@@ -229,6 +231,7 @@ public class Player {
         fromSpeed = -speed * .8f;
         speed = fromSpeed;
         lives -= 1;
+
     }
 
     public int getFlowers() {
