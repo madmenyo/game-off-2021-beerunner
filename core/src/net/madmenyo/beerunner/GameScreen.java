@@ -28,6 +28,7 @@ import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -54,8 +55,12 @@ public class GameScreen extends ScreenAdapter {
 
     private GuiStage gui;
 
+    private PlayerController playerController;
+
     private Sound beeSound;
     private long beeSoundId;
+
+    private boolean pause= false;
 
     // Tests, might need refactoring
     TrackGenerator trackGenerator;
@@ -134,8 +139,9 @@ public class GameScreen extends ScreenAdapter {
 
         followCam = new FollowCam(camera, player, trackGenerator);
 
+        gui = new GuiStage(new ExtendViewport(1280, 720), spriteBatch, player, beeRunner, this);
 
-        gui = new GuiStage(new ExtendViewport(1280, 720), spriteBatch, player, beeRunner);
+        playerController = new PlayerController(player, gui);
 
         font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
     }
@@ -213,15 +219,16 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         setCamera();
 
-        InputMultiplexer im = new InputMultiplexer(fpsController);
-        Gdx.input.setInputProcessor(im);
+        //InputMultiplexer im = new InputMultiplexer(fpsController);
+        //Gdx.input.setInputProcessor(im);
 
         beeRunner.menuMusic.setVolume(0);
         beeRunner.gameMusic.setPosition(0);
         beeRunner.gameMusic.setVolume(.6f);
         beeRunner.gameMusic.play();
 
-        Gdx.input.setInputProcessor(gui);
+        InputMultiplexer im = new InputMultiplexer(gui, playerController, new GestureDetector(playerController));
+        Gdx.input.setInputProcessor(im);
     }
 
 
@@ -241,25 +248,31 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        //fpsController.update(delta * 20f);
-        followCam.update(delta);
-        player.update(delta);
-        envMap.transform.set(camera.position, new Quaternion(), new Vector3(500, 500, 500) );
-        //trackGenerator.setCameraBehind(camera, player, shapeRenderer);
+        if (!pause) {
+            //fpsController.update(delta * 20f);
+            followCam.update(delta);
+            player.update(delta);
+            envMap.transform.set(camera.position, new Quaternion(), new Vector3(500, 500, 500));
+            //trackGenerator.setCameraBehind(camera, player, shapeRenderer);
 
-        float volume = player.getHeight() / player.getMaxHeight();
-        beeSound.setVolume(beeSoundId, volume * .6f);
+            float volume = player.getHeight() / player.getMaxHeight();
+            beeSound.setVolume(beeSoundId, volume * .6f);
 
-        for (CollisionObject colObjects : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
-            colObjects.update(delta);
+            playerController.update(delta);
+
+            for (CollisionObject colObjects : trackGenerator.getCurrentTrackSection().getCollisionObjects()) {
+                colObjects.update(delta);
+            }
+
+
+            // Handle collisions
+            trackCollision();
+        } else {
+            beeSound.setVolume(beeSoundId, 0);
         }
 
-        //Update gui after game logic update
+        //Update gui after game logic update and also on pause
         gui.act();
-
-        // Handle collisions
-        trackCollision();
-
 
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -407,4 +420,11 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.box(point.x - size / 2f, point.y - size / 2f, point.z + size / 2f, size, size, size);
     }
 
+    public void setPause(boolean pause) {
+        this.pause = pause;
+    }
+
+    public boolean isPause() {
+        return pause;
+    }
 }

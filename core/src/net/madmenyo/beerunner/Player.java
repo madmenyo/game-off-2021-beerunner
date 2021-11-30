@@ -29,9 +29,10 @@ public class Player {
     private float moveSpeed = 25;
     private float flySpeed = 25;
     private float flyCost = 10;
+    private boolean flying = false;
 
     private int maxLives = 3;
-    private int lives = 1;
+    private int lives = 3;
 
     private float maxEnergy = 50;
     private float energyTreshHold = 10;
@@ -69,8 +70,22 @@ public class Player {
     }
 
     public void update(float delta){
-        controlls(delta);
+        flying = false;
+        //controlls(delta);
         movement(delta);
+
+        // regen energy if not flying this frame
+        if (!flying){
+
+            if (depleted){
+                depleted = energy < energyTreshHold;
+            }
+            height -= 20 * delta;
+            height = MathUtils.clamp(height, minHeight, maxHeight);
+
+            energy += energyRegen * delta;
+            energy = MathUtils.clamp(energy, 0, maxEnergy);
+        }
     }
 
     /**
@@ -134,38 +149,43 @@ public class Player {
      * @param delta
      */
     private void controlls(float delta) {
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            offset -= moveSpeed * delta;
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)){
+            moveLeft(delta);
 
-        } else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            offset += moveSpeed * delta;
-        }
-        offset = MathUtils.clamp(offset, -16, 16);
-
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && energy > 0 && !depleted){
-            height += flySpeed * delta;
-            height = MathUtils.clamp(height, minHeight, maxHeight);
-
-            energy -= flyCost * delta;
-            energy = MathUtils.clamp(energy, 0, maxEnergy);
-
-            if (energy == 0){
-                depleted = true;
-            }
-
-        } else {
-            if (depleted){
-                depleted = energy < energyTreshHold;
-            }
-            height -= 20 * delta;
-            height = MathUtils.clamp(height, minHeight, maxHeight);
-
-            energy += energyRegen * delta;
-            energy = MathUtils.clamp(energy, 0, maxEnergy);
-
+        } else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)){
+            moveRight(delta);
         }
 
+        if ((Gdx.input.isKeyPressed(Input.Keys.SPACE)  || Gdx.input.isKeyPressed(Input.Keys.W)) && energy > 0 && !depleted){
+            fly(delta);
+
+        }
     }
+
+    public void moveLeft(float delta) {
+        offset -= moveSpeed * delta;
+        offset = MathUtils.clamp(offset, -16, 16);
+    }
+
+    public void moveRight(float delta) {
+        offset += moveSpeed * delta;
+        offset = MathUtils.clamp(offset, -16, 16);
+    }
+
+    public void fly(float delta) {
+        if (depleted) return;
+        height += flySpeed * delta;
+        height = MathUtils.clamp(height, minHeight, maxHeight);
+
+        energy -= flyCost * delta;
+        energy = MathUtils.clamp(energy, 0, maxEnergy);
+
+        if (energy == 0){
+            depleted = true;
+        }
+        flying = true;
+    }
+
 
     public ModelInstance getModelInstance() {
         return modelInstance;

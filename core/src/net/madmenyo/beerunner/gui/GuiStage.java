@@ -12,12 +12,14 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import net.madmenyo.beerunner.Assets;
 import net.madmenyo.beerunner.BeeRunner;
+import net.madmenyo.beerunner.GameScreen;
 import net.madmenyo.beerunner.Player;
 
 public class GuiStage extends Stage {
 
     private Skin skin;
     private BeeRunner beeRunner;
+    private GameScreen gameScreen;
 
     Table table = new Table();
 
@@ -43,11 +45,12 @@ public class GuiStage extends Stage {
     private GameOverTable gameOverTable;
 
 
-    public GuiStage(Viewport viewport, Batch batch, Player player, BeeRunner beeRunner) {
+    public GuiStage(Viewport viewport, Batch batch, Player player, BeeRunner beeRunner, GameScreen gameScreen) {
         super(viewport, batch);
         this.player = player;
         this.skin = beeRunner.assetManager.get(Assets.skin);
         this.beeRunner = beeRunner;
+        this.gameScreen = gameScreen;
 
         heart = skin.getDrawable("heart");
         damage = skin.getDrawable("heart_out");
@@ -105,5 +108,13 @@ public class GuiStage extends Stage {
             gameOver = true;
             gameOverTable.show();
         }
+    }
+
+    public void pause(boolean pause){
+        gameScreen.setPause(pause);
+    }
+
+    public boolean isPaused(){
+        return gameScreen.isPause();
     }
 }
