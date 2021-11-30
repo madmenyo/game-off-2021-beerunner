@@ -6,6 +6,9 @@ import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.ModelLoader;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
+import com.badlogic.gdx.assets.loaders.SoundLoader;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.Texture;
@@ -28,13 +31,25 @@ public class Assets {
     public static final AssetDescriptor<Texture> background = new AssetDescriptor<>("gui/background.png", Texture.class);
     public static final AssetDescriptor<Skin> skin = new AssetDescriptor<>("gui/guiskin.json", Skin.class, new SkinLoader.SkinParameter("gui/skin.atlas"));
 
+    public static final AssetDescriptor<Sound> click = new AssetDescriptor<Sound>("sound/click.wav", Sound.class);
+    public static final AssetDescriptor<Sound> bee = new AssetDescriptor<Sound>("sound/bee.wav", Sound.class);
+
     private AssetManager assetManager = new AssetManager();
+
+    public static final AssetDescriptor<Music> menuMusic = new AssetDescriptor<>("sound/forest_loop.mp3", Music.class);
+    public static final AssetDescriptor<Music> gameMusic = new AssetDescriptor<>("sound/musicloop.mp3", Music.class);
 
 
     public void load(){
 
         assetManager.load(background);
         assetManager.load(skin);
+
+        assetManager.load(click);
+        assetManager.load(bee);
+
+        assetManager.load(menuMusic);
+        assetManager.load(gameMusic);
 
         for (FileHandle file : Gdx.files.internal("models/trees").list()){
 

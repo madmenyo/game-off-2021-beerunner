@@ -239,6 +239,14 @@ public class Player {
         renderer.box(bounds.getCenterX() - bounds.getWidth() / 2, bounds.getCenterY() - bounds.getHeight() / 2, bounds.getCenterZ() + bounds.getDepth() / 2, bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
     }
 
+    public float getHeight() {
+        return height;
+    }
+
+    public float getMaxHeight() {
+        return maxHeight;
+    }
+
     public boolean flyingMaxHeight(){
         return height == maxHeight;
     }

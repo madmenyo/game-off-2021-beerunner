@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.GL20;
@@ -49,10 +50,12 @@ public class GameScreen extends ScreenAdapter {
     private Environment environment;
     private ModelBatch modelBatch;
 
-    private AssetManager assetManager;
+    private BeeRunner beeRunner;
 
     private GuiStage gui;
 
+    private Sound beeSound;
+    private long beeSoundId;
 
     // Tests, might need refactoring
     TrackGenerator trackGenerator;
@@ -73,8 +76,12 @@ public class GameScreen extends ScreenAdapter {
     ModelBuilder mb = new ModelBuilder();
     ModelInstance envMap;
 
-    public GameScreen(AssetManager assetManager) {
-        this.assetManager = assetManager;
+    public GameScreen(BeeRunner beeRunner) {
+        this.beeRunner = beeRunner;
+
+        beeSound = beeRunner.assetManager.get(Assets.bee);
+        beeSoundId = beeSound.loop(.06f);
+
 
         camera = new PerspectiveCamera(67, 1920, 1080);
         viewport = new ExtendViewport(1920, 1080, camera);
@@ -172,7 +179,7 @@ public class GameScreen extends ScreenAdapter {
         shadowBatch = new ModelBatch(new DepthShaderProvider());
         modelBatch = new ModelBatch();
 
-        trackGenerator = new TrackGenerator(assetManager);
+        trackGenerator = new TrackGenerator(beeRunner.assetManager);
 
 
         /*
@@ -203,6 +210,11 @@ public class GameScreen extends ScreenAdapter {
 
         InputMultiplexer im = new InputMultiplexer(fpsController);
         Gdx.input.setInputProcessor(im);
+
+        beeRunner.menuMusic.setVolume(0);
+        beeRunner.gameMusic.setPosition(0);
+        beeRunner.gameMusic.setVolume(.6f);
+        beeRunner.gameMusic.play();
     }
 
     private void setCamera() {
@@ -226,6 +238,9 @@ public class GameScreen extends ScreenAdapter {
         player.update(delta);
         envMap.transform.set(camera.position, new Quaternion(), new Vector3(500, 500, 500) );
         //trackGenerator.setCameraBehind(camera, player, shapeRenderer);
+
+        float volume = player.getHeight() / player.getMaxHeight();
+        beeSound.setVolume(beeSoundId, volume * .6f);
 
         for (CollisionObject colObjects : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
             colObjects.update(delta);
@@ -278,7 +293,7 @@ public class GameScreen extends ScreenAdapter {
         else {
             shapeRenderer.setColor(Color.GREEN);
         }
-        player.drawBounds(shapeRenderer);
+        //player.drawBounds(shapeRenderer);
 
         /*
         player.getBounds().getCorner000(tmp);
@@ -290,7 +305,7 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.end();
 
-        //gui.draw();
+        gui.draw();
     }
 
     private void renderTrackPass() {
