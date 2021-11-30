@@ -55,7 +55,7 @@ public class TrackGenerator {
         // Ridiculously repetitively... :)
         placeSideObjects(currentTrackSection);
         //placeCollisionObjects(currentTrackSection);
-        placePickup(currentTrackSection);
+        //placePickup(currentTrackSection);
         placeEdges(currentTrackSection);
 
         nextSection = new TrackSection(curveGenerator.getCurve());
