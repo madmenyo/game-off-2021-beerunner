@@ -290,7 +290,7 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.end();
 
-        gui.draw();
+        //gui.draw();
     }
 
     private void renderTrackPass() {

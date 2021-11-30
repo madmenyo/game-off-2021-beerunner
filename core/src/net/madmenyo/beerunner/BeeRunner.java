@@ -13,8 +13,9 @@ public class BeeRunner extends Game {
 
 		assets.load();
 
+		setScreen(new MenuScreen(assets.getAssetManager()));
 
 
-		setScreen(new GameScreen(assets.getAssetManager()));
+		//setScreen(new GameScreen(assets.getAssetManager()));
 	}
 }
