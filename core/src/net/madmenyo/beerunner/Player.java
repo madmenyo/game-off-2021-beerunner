@@ -70,7 +70,6 @@ public class Player {
     }
 
     public void update(float delta){
-        flying = false;
         //controlls(delta);
         movement(delta);
 
@@ -272,5 +271,9 @@ public class Player {
 
     public boolean flyingMaxHeight(){
         return height == maxHeight;
+    }
+
+    public void setFlying(boolean flying) {
+        this.flying = flying;
     }
 }

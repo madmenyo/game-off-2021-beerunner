@@ -44,11 +44,12 @@ public class PlayerController implements GestureDetector.GestureListener, InputP
         }
         if (keycode == Input.Keys.UP || keycode == Input.Keys.W || keycode == Input.Keys.SPACE) {
             flying = true;
+            player.setFlying(true);
         }
 
         if (keycode == Input.Keys.BACK || keycode == Input.Keys.ESCAPE){
-            if (gui.isPaused()) gui.pause(false);
-            else gui.pause(true);
+            if (gui.isPaused()) gui.setPause(false);
+            else gui.setPause(true);
         }
         return false;
     }
@@ -64,6 +65,7 @@ public class PlayerController implements GestureDetector.GestureListener, InputP
         }
         if (keycode == Input.Keys.UP || keycode == Input.Keys.W || keycode == Input.Keys.SPACE) {
             flying = false;
+            player.setFlying(false);
         }
         return false;
     }

@@ -42,7 +42,7 @@ public class GuiStage extends Stage {
     private Drawable heart;
     private Drawable damage;
 
-    private GameOverTable gameOverTable;
+    private PopupTable popupTable;
 
 
     public GuiStage(Viewport viewport, Batch batch, Player player, BeeRunner beeRunner, GameScreen gameScreen) {
@@ -82,10 +82,10 @@ public class GuiStage extends Stage {
         table.add(energyBar).width(getWidth() * .2f).height(18).left().row();
         table.add(honey).expandX().left();
 
-        gameOverTable = new GameOverTable(skin, player, beeRunner);
-        addActor(gameOverTable);
-        gameOverTable.setFillParent(true);
-        gameOverTable.setVisible(false);
+        popupTable = new PopupTable(skin, player, beeRunner);
+        addActor(popupTable);
+        popupTable.setFillParent(true);
+        popupTable.setVisible(false);
     }
 
     private boolean gameOver = false;
@@ -106,12 +106,17 @@ public class GuiStage extends Stage {
 
         if (!gameOver && player.getLives() <= 0){
             gameOver = true;
-            gameOverTable.show();
+            popupTable.show("Game Over", true, this);
         }
     }
 
-    public void pause(boolean pause){
+    public void setPause(boolean pause){
         gameScreen.setPause(pause);
+        if (pause){
+            popupTable.show("PAUSE", false, this);
+        }else {
+            popupTable.setVisible(false);
+        }
     }
 
     public boolean isPaused(){
