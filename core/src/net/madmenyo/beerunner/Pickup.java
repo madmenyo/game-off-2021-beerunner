@@ -35,8 +35,4 @@ public class Pickup extends CollisionObject{
 
     }
 
-    @Override
-    public boolean shouldRender() {
-        return !pickedUp;
-    }
 }

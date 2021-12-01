@@ -9,6 +9,9 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
+/**
+ * Base class for all objects that need collision
+ */
 public abstract class CollisionObject {
 
     private BoundingBox bounds = new BoundingBox();
@@ -33,6 +36,10 @@ public abstract class CollisionObject {
         bounds.mul(modelInstance.transform);
     }
 
+    /**
+     * Helper class to draw the collision bounds of the object
+     * @param shapeRenderer
+     */
     public void drawBounds(ShapeRenderer shapeRenderer){
         shapeRenderer.box(bounds.getCenterX() - bounds.getWidth() / 2, bounds.getCenterY() - bounds.getHeight() / 2, bounds.getCenterZ() + bounds.getDepth() / 2,
                 bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
@@ -51,6 +58,4 @@ public abstract class CollisionObject {
     public BoundingBox getBounds() {
         return bounds;
     }
-
-    public abstract boolean shouldRender();
 }

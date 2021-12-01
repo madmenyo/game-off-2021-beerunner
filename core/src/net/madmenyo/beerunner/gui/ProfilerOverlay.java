@@ -1,6 +1,7 @@
 package net.madmenyo.beerunner.gui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -51,6 +52,10 @@ public class ProfilerOverlay extends Table {
     public void act(float delta) {
         super.act(delta);
 
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F3)){
+            setProfiling(!profiling);
+        }
+
         fpsLabel.setText(Gdx.graphics.getFramesPerSecond());
         glBindsLabel.setText(profiler.getTextureBindings());
         glSwitches.setText(profiler.getShaderSwitches());
@@ -63,7 +68,13 @@ public class ProfilerOverlay extends Table {
     public void setProfiling(boolean profiling) {
         this.profiling = profiling;
 
-        if (profiling) profiler.enable();
-        else profiler.disable();
+        if (profiling) {
+            profiler.enable();
+            setVisible(true);
+        }
+        else {
+            profiler.disable();
+            setVisible(false);
+        }
     }
 }

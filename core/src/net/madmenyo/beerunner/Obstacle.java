@@ -51,8 +51,4 @@ public class Obstacle extends CollisionObject{
         return hit;
     }
 
-    @Override
-    public boolean shouldRender() {
-        return true;
-    }
 }

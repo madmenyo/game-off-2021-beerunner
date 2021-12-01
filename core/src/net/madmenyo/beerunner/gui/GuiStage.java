@@ -56,7 +56,9 @@ public class GuiStage extends Stage {
 
         addHud(player);
         addPopup(player, beeRunner);
+
         addProfileOverlay();
+        profilerOverlay.setProfiling(false);
     }
 
     private void addHud(Player player) {

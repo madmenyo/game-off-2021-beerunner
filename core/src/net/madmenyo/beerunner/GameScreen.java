@@ -212,7 +212,9 @@ public class GameScreen extends ScreenAdapter {
         Gdx.input.setInputProcessor(im);
     }
 
-
+    /**
+     * Sets initial camera, used when debugging with FPS controler
+     */
     private void setCamera() {
         camera.position.set(0, 5, -10);
         camera.lookAt(0, 0, 0);
@@ -272,7 +274,9 @@ public class GameScreen extends ScreenAdapter {
         gui.draw();
     }
 
-
+    /**
+     * Renders the track normally
+     */
     private void renderTrackPass() {
         modelBatch.begin(camera);
         modelBatch.render(player.getModelInstance(), environment);
@@ -285,6 +289,9 @@ public class GameScreen extends ScreenAdapter {
         modelBatch.end();
     }
 
+    /**
+     * Make a shadow render
+     */
     private void renderShadowPass() {
 
         //create shadow texture
@@ -308,15 +315,18 @@ public class GameScreen extends ScreenAdapter {
         shadowLight.end();
     }
 
+    /**
+     * Handle collision on the tracks
+     *
+     * Perhaps handle for all tracks?
+     */
     private void trackCollision() {
         for (TrackSection track : trackGenerator.getTrackSections()){
             track.handleCollisions(player, beeRunner.assetManager);
         }
 
-        // render current
         trackGenerator.getCurrentTrackSection().handleCollisions(player, beeRunner.assetManager);
 
-        // render next
         trackGenerator.getNextSection().handleCollisions(player, beeRunner.assetManager );
     }
 
@@ -325,6 +335,11 @@ public class GameScreen extends ScreenAdapter {
         viewport.update(width, height);
     }
 
+    /**
+     * Helper method to draw a box shape
+     * @param point
+     * @param size
+     */
     private void drawBox (Vector3 point, float size){
         shapeRenderer.box(point.x - size / 2f, point.y - size / 2f, point.z + size / 2f, size, size, size);
     }
