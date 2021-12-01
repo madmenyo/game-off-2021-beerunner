@@ -1,10 +1,12 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -19,6 +21,7 @@ import com.badlogic.gdx.utils.Pools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Responsible for generating tracks on demand and keeping records.
@@ -36,6 +39,9 @@ public class TrackGenerator {
 
     private final List<TrackSection> previousSections = new ArrayList<>();
 
+    // Catch lists
+    private List<ModelInstance> treeInstances = new ArrayList<>();
+    private List<ModelInstance> rockInstances = new ArrayList<>();
 
 
     /** Total distance of previous tracks **/
@@ -46,80 +52,87 @@ public class TrackGenerator {
     private Vector3 tmp1 = new Vector3();
     private Vector3 tmp2 = new Vector3();
 
-
     // ---
-
-    ModelBuilder modelBuilder = new ModelBuilder();
 
     public TrackGenerator(AssetManager assetManager) {
         this.assetManager = assetManager;
         curveGenerator = new SimpleCurveGenerator();
 
-        ModelCache modelCache = new ModelCache();
+        fillCacheInstances();
+
+
+        //currentTrackSection = new TrackSection(curveGenerator.getCurve());
+        currentTrackSection = Pools.obtain(TrackSection.class);
+        currentTrackSection.init(curveGenerator.getCurve());
+
+
+        ModelCache modelCache = currentTrackSection.getSideObjectCache();
         modelCache.begin();
-        currentTrackSection = new TrackSection(curveGenerator.getCurve());
         // Ridiculously repetitively... :)
         placeSideObjects(currentTrackSection, modelCache);
         //placeCollisionObjects(currentTrackSection);
         //placePickup(currentTrackSection);
         placeEdges(currentTrackSection, modelCache);
         modelCache.end();
-        currentTrackSection.setSideObjectCache(modelCache);
 
-        modelCache = new ModelCache();
+        //nextSection = new TrackSection(curveGenerator.getCurve());
+        nextSection = Pools.obtain(TrackSection.class);
+        nextSection.init(curveGenerator.getCurve());
+
+        modelCache = nextSection.getSideObjectCache();
         modelCache.begin();
-        nextSection = new TrackSection(curveGenerator.getCurve());
+
         placeSideObjects(nextSection, modelCache);
         //placeCollisionObjects(nextSection);
         placePickup(nextSection);
         placeEdges(nextSection, modelCache);
 
         modelCache.end();
-        nextSection.setSideObjectCache(modelCache);
 
+    }
 
-
-        // Dummy track section
-        /*
-        currentTrackSection = new TrackSection(new Bezier<>(
-                new Vector3(0,0,0),
-                new Vector3(15,0,5),
-                new Vector3(15,0,15),
-                new Vector3(15,0,100)
-        ));
-
-         */
-
+    private void fillCacheInstances() {
+        for (AssetDescriptor<Model> rock : Assets.rocks){
+            rockInstances.add(new ModelInstance(assetManager.get(rock)));
+        }
+        for (AssetDescriptor<Model> tree : Assets.trees){
+            treeInstances.add(new ModelInstance(assetManager.get(tree)));
+        }
     }
 
 
     public float nextTrack() {
+        long time = System.currentTimeMillis();
         // For now stay on current track and reset t
         previousSections.add(currentTrackSection);
         if (previousSections.size() > 2){
             previousSections.get(1).dispose();
-            previousSections.remove(1);
+
+            TrackSection t = previousSections.remove(1);
+            Pools.free(t);
         }
         currentTrackSection = nextSection;
-        nextSection = new TrackSection(curveGenerator.getCurve());
+        //nextSection = new TrackSection(curveGenerator.getCurve());
+        nextSection = Pools.obtain(TrackSection.class);
+        nextSection.init(curveGenerator.getCurve());
 
-        ModelCache modelCache = new ModelCache();
+
+        ModelCache modelCache = nextSection.getSideObjectCache();
         modelCache.begin();
         placeSideObjects(nextSection, modelCache);
         placeEdges(nextSection, modelCache);
         modelCache.end();
-        //placeCollisionObjects(nextSection);
         placePickup(nextSection);
 
-        nextSection.setSideObjectCache(modelCache);
+        System.out.println("Generated track in: " + (System.currentTimeMillis() - time) + "ms.");
 
 
-        Array<Renderable> tmp = new Array();
-
-        modelCache.getRenderables(tmp, Pools.get(Renderable.class));
-
-        System.out.println("Cache size: " + tmp.size);
         return 0f;
+    }
+
+    private void addInstance(ModelInstance instance, ModelCache modelCache){
+        modelCache.add(instance);
+        instance.transform.idt();
     }
 
     /**
@@ -127,7 +140,7 @@ public class TrackGenerator {
      * @param track
      */
     private void placePickup(TrackSection track) {
-        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+        for (float d = 0; d  < track.getCurveLength(); ) {
 
             boolean rock = MathUtils.random(100) < 30;
 
@@ -169,29 +182,6 @@ public class TrackGenerator {
         }
     }
 
-    /**
-     * Hack in some object to dodge
-     * @param trackSection
-     */
-    private void placeCollisionObjects(TrackSection trackSection) {
-        modelBuilder.begin();
-        MeshPartBuilder meshBuilder;
-        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
-        SphereShapeBuilder.build(meshBuilder, 4, 4, 4, 12, 12);
-
-        ModelInstance instance = new ModelInstance(modelBuilder.end());
-        float t = trackSection.findT(100);
-
-        trackSection.getCurve().valueAt(tmp1, t);
-        tmp1.y += 6;
-        instance.transform.translate(tmp1);
-
-        Obstacle obstacle = new Obstacle(instance);
-
-
-        trackSection.getCollisionObjects().add(obstacle);
-    }
-
 
     /**
      * No more time left, just hack in some objects to give the world some live
@@ -200,11 +190,12 @@ public class TrackGenerator {
     private void placeSideObjects(TrackSection track, ModelCache modelCache) {
 
         // Left side
-        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+        for (float d = 0; d  < track.getCurveLength(); ) {
 
             d += MathUtils.random() * 5 + 10;
 
-            ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
+            //ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
+            ModelInstance ml = treeInstances.get(MathUtils.random(treeInstances.size() - 1));
             float t = track.findT(d);
             track.getCurve().valueAt(tmp1, t);
             track.getCurve().derivativeAt(tmp2, t);
@@ -220,16 +211,18 @@ public class TrackGenerator {
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
             modelCache.add(ml);
+            ml.transform.idt();
             //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
 
         // right side
-        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+        for (float d = 0; d  < track.getCurveLength(); ) {
 
             d += MathUtils.random() * 2 + 5;
 
-            ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
+            //ModelInstance ml = new ModelInstance(assetManager.get(Assets.trees.get(MathUtils.random(Assets.trees.size() - 1))));
+            ModelInstance ml = treeInstances.get(MathUtils.random(treeInstances.size() - 1));
             float t = track.findT(d);
             track.getCurve().valueAt(tmp1, t);
             track.getCurve().derivativeAt(tmp2, t);
@@ -245,6 +238,7 @@ public class TrackGenerator {
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
             modelCache.add(ml);
+            ml.transform.idt();
             //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
@@ -257,11 +251,12 @@ public class TrackGenerator {
     private void placeEdges(TrackSection track, ModelCache modelCache) {
 
         // Left side
-        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+        for (float d = 0; d  < track.getCurveLength(); ) {
 
             d += MathUtils.random() * 5 + 10;
 
-            ModelInstance ml = new ModelInstance(assetManager.get(Assets.rocks.get(MathUtils.random(Assets.rocks.size() - 1))));
+            //ModelInstance ml = new ModelInstance(assetManager.get(Assets.rocks.get(MathUtils.random(Assets.rocks.size() - 1))));
+            ModelInstance ml = rockInstances.get(MathUtils.random(rockInstances.size() - 1));
             float t = track.findT(d);
             track.getCurve().valueAt(tmp1, t);
             track.getCurve().derivativeAt(tmp2, t);
@@ -277,16 +272,18 @@ public class TrackGenerator {
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
             modelCache.add(ml);
+            ml.transform.idt();
             //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
 
         // right side
-        for (float d = 0; d  < track.getCurve().approxLength(100); ) {
+        for (float d = 0; d  < track.getCurveLength(); ) {
 
             d += MathUtils.random() * 3 + 6;
 
-            ModelInstance ml = new ModelInstance(assetManager.get(Assets.rocks.get(MathUtils.random(Assets.rocks.size() - 1))));
+            //ModelInstance ml = new ModelInstance(assetManager.get(Assets.rocks.get(MathUtils.random(Assets.rocks.size() - 1))));
+            ModelInstance ml = rockInstances.get(MathUtils.random(rockInstances.size() - 1));
             float t = track.findT(d);
             track.getCurve().valueAt(tmp1, t);
             track.getCurve().derivativeAt(tmp2, t);
@@ -302,6 +299,7 @@ public class TrackGenerator {
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
             modelCache.add(ml);
+            ml.transform.idt();
             //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
@@ -326,12 +324,6 @@ public class TrackGenerator {
     }
 
     public void setCameraBehind(PerspectiveCamera camera, Player player, ShapeRenderer shapeRenderer){
-        /*
-        float t = currentTrackSection.getCurve().approximate(player.getPosition());
-        Vector3 v3 = new Vector3();
-        currentTrackSection.getCurve().valueAt(v3, t);
-        shapeRenderer.box(v3.x, v3.y, v3.z, 1, 1, 1);
-         */
 
         float t = player.gettCurve();
         t -= .2f;

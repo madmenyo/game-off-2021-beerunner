@@ -22,7 +22,7 @@ public class Obstacle extends CollisionObject{
     public void update(float delta) {
         if (!hit) return;
         sinkSpeed *= sinkAcceleration;
-        modelInstance.transform.translate(0, sinkSpeed * delta, 0);
+        modelInstance.transform.translate(0, sinkSpeed * sinkAcceleration * delta, 0);
     }
 
     @Override

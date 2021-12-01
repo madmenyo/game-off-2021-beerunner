@@ -36,9 +36,9 @@ import java.util.TreeMap;
 /**
  * Tracksection maps the curve to the mesh and holds other data like sides and obstacles.
  */
-public class TrackSection implements Disposable {
+public class TrackSection implements Disposable, Pool.Poolable {
     private Bezier<Vector3> curve;
-    float curveLength;
+    private float curveLength;
 
     private float trackWidth;
 
@@ -60,7 +60,20 @@ public class TrackSection implements Disposable {
     /** map distance -> t **/
     private SortedMap<Float, Float> curveLookUp = new TreeMap<>();
 
+    public TrackSection() {
+    }
+
     public TrackSection(Bezier<Vector3> curve) {
+        this.curve = curve;
+        curveLength = curve.approxLength(500);
+        trackWidth = 60;
+
+        createLookup(curve);
+
+        generateMesh(5);
+    }
+
+    public void init(Bezier<Vector3> curve){
         this.curve = curve;
         curveLength = curve.approxLength(500);
         trackWidth = 60;
@@ -71,6 +84,7 @@ public class TrackSection implements Disposable {
 
     }
 
+
     /**
      * Creates a lookup table that maps distance to t on curve
      * This way I can lookup position and derivative of t.
@@ -78,6 +92,7 @@ public class TrackSection implements Disposable {
      * @param curve
      */
     private void createLookup(Bezier<Vector3> curve) {
+        curveLookUp.clear();
         curveLookUp.put(0f, 0f);
         curve.valueAt(tmp2, 0f);
         float dst = 0;
@@ -445,7 +460,15 @@ public class TrackSection implements Disposable {
         }
     }
 
-    public void setSideObjectCache(ModelCache sideObjectCache) {
-        this.sideObjectCache = sideObjectCache;
+    public ModelCache getSideObjectCache() {
+        return sideObjectCache;
+    }
+
+    public float getCurveLength() {
+        return curveLength;
+    }
+
+    @Override
+    public void reset() {
     }
 }

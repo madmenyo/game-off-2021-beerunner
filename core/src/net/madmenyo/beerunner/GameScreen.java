@@ -20,6 +20,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -88,14 +91,27 @@ public class GameScreen extends ScreenAdapter {
 
         createCubeEnvironment();
 
-        CreateRenderEnvironment();
+        createRenderEnvironment();
 
         spriteBatch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
 
-        shadowBatch = new ModelBatch(new DepthShaderProvider());
-        modelBatch = new ModelBatch();
+        DefaultShader.Config config = new DefaultShader.Config();
+        config.numBones = 0;
+        config.numDirectionalLights = 1;
+        config.numPointLights = 0;
+        config.numSpotLights = 0;
+
+        DepthShader.Config depthConfig = new DepthShader.Config();
+        depthConfig.numBones = 0;
+        depthConfig.numDirectionalLights = 1;
+        depthConfig.numPointLights = 0;
+        depthConfig.numSpotLights = 0;
+
+        shadowBatch = new ModelBatch(new DepthShaderProvider(depthConfig));
+        modelBatch = new ModelBatch(new DefaultShaderProvider(config));
+
 
         // Should use a mesh pool to reduce GC load
         modelCache = new ModelCache();
@@ -115,7 +131,7 @@ public class GameScreen extends ScreenAdapter {
         font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
     }
 
-    private void CreateRenderEnvironment() {
+    private void createRenderEnvironment() {
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
 
