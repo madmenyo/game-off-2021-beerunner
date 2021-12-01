@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -51,18 +52,28 @@ public class TrackGenerator {
         this.assetManager = assetManager;
         curveGenerator = new SimpleCurveGenerator();
 
+        ModelCache modelCache = new ModelCache();
+        modelCache.begin();
         currentTrackSection = new TrackSection(curveGenerator.getCurve());
         // Ridiculously repetitively... :)
-        placeSideObjects(currentTrackSection);
+        placeSideObjects(currentTrackSection, modelCache);
         //placeCollisionObjects(currentTrackSection);
         //placePickup(currentTrackSection);
-        placeEdges(currentTrackSection);
+        placeEdges(currentTrackSection, modelCache);
+        modelCache.end();
+        currentTrackSection.setSideObjectCache(modelCache);
 
+        modelCache = new ModelCache();
+        modelCache.begin();
         nextSection = new TrackSection(curveGenerator.getCurve());
-        placeSideObjects(nextSection);
+        placeSideObjects(nextSection, modelCache);
         //placeCollisionObjects(nextSection);
         placePickup(nextSection);
-        placeEdges(nextSection);
+        placeEdges(nextSection, modelCache);
+
+        modelCache.end();
+        nextSection.setSideObjectCache(modelCache);
+
 
 
         // Dummy track section
@@ -89,10 +100,15 @@ public class TrackGenerator {
         currentTrackSection = nextSection;
         nextSection = new TrackSection(curveGenerator.getCurve());
 
-        placeSideObjects(nextSection);
-        placeEdges(nextSection);
+        ModelCache modelCache = new ModelCache();
+        modelCache.begin();
+        placeSideObjects(nextSection, modelCache);
+        placeEdges(nextSection, modelCache);
+        modelCache.end();
         //placeCollisionObjects(nextSection);
         placePickup(nextSection);
+
+        nextSection.setSideObjectCache(modelCache);
 
         return 0f;
     }
@@ -172,7 +188,7 @@ public class TrackGenerator {
      * No more time left, just hack in some objects to give the world some live
      * @param track
      */
-    private void placeSideObjects(TrackSection track) {
+    private void placeSideObjects(TrackSection track, ModelCache modelCache) {
 
         // Left side
         for (float d = 0; d  < track.getCurve().approxLength(100); ) {
@@ -194,7 +210,8 @@ public class TrackGenerator {
             ml.transform.scl(MathUtils.random(.03f, .05f));
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
-            track.getSideObjects().add(ml);
+            modelCache.add(ml);
+            //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
 
@@ -218,7 +235,8 @@ public class TrackGenerator {
             ml.transform.scl(MathUtils.random(.03f, .05f));
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
-            track.getSideObjects().add(ml);
+            modelCache.add(ml);
+            //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
     }
@@ -227,7 +245,7 @@ public class TrackGenerator {
      * No more time left, just hack in some objects to give the world some live
      * @param track
      */
-    private void placeEdges(TrackSection track) {
+    private void placeEdges(TrackSection track, ModelCache modelCache) {
 
         // Left side
         for (float d = 0; d  < track.getCurve().approxLength(100); ) {
@@ -249,7 +267,8 @@ public class TrackGenerator {
             ml.transform.scl(MathUtils.random(.09f, .13f), MathUtils.random(.09f, .22f), MathUtils.random(.09f, .13f));
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
-            track.getSideObjects().add(ml);
+            modelCache.add(ml);
+            //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
 
@@ -273,7 +292,8 @@ public class TrackGenerator {
             ml.transform.scl(MathUtils.random(.09f, .13f), MathUtils.random(.09f, .22f), MathUtils.random(.09f, .13f));
             ml.transform.rotate(Vector3.Y, MathUtils.random(360));
 
-            track.getSideObjects().add(ml);
+            modelCache.add(ml);
+            //track.getSideObjects().add(ml);
             //pathObjects.add(new PathObject(ml));
         }
 

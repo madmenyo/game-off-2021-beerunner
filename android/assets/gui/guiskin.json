@@ -56,7 +56,8 @@
   LabelStyle: {
     default: { font: def, fontColor: white },
     dark: { font: def, fontColor: dark},
-    title: { font: main-font }
+    title: { font: main-font },
+    yellow: { font: def, fontColor: bee }
   },
   TextFieldStyle: {
     default: { selection: selection, background: textfield, font: default-font, fontColor: white, cursor: cursor }

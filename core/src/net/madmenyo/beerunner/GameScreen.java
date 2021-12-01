@@ -248,6 +248,7 @@ public class GameScreen extends ScreenAdapter {
         modelBatch.render(envMap);
         modelBatch.end();
 
+        /*
         cacheAllInstances();
 
         // render shadow
@@ -265,8 +266,10 @@ public class GameScreen extends ScreenAdapter {
         modelBatch.render(modelCache, environment);
         modelBatch.end();
 
-        //renderShadowPass();
-        //renderTrackPass();
+         */
+
+        renderShadowPass();
+        renderTrackPass();
 
 
 
@@ -308,55 +311,6 @@ public class GameScreen extends ScreenAdapter {
         gui.draw();
     }
 
-    private void cacheAllInstances(){
-        modelCache.begin(camera);
-        modelCache.add(player.getModelInstance());
-
-
-        for (TrackSection track : trackGenerator.getPreviousSections()) {
-            modelCache.add(track.getSideObjects());
-            modelCache.add(track.getTrack());
-            for (CollisionObject o : track.getCollisionObjects()) {
-                if (o.shouldRender()) modelCache.add(o.modelInstance);
-            }
-        }
-
-        // render current
-        modelCache.add(trackGenerator.getCurrentTrackSection().getSideObjects());
-        modelCache.add(trackGenerator.getCurrentTrackSection().getTrack());
-        for (CollisionObject o : trackGenerator.getCurrentTrackSection().getCollisionObjects()) {
-            if (o.shouldRender()) modelCache.add(o.modelInstance);
-        }
-
-        // render next
-        modelCache.add(trackGenerator.getNextSection().getSideObjects());
-        modelCache.add(trackGenerator.getNextSection().getTrack());
-        for (CollisionObject o : trackGenerator.getNextSection().getCollisionObjects()) {
-            if (o.shouldRender()) modelCache.add(o.modelInstance);
-        }
-
-
-        modelCache.end();
-        modelBatch.render(modelCache, environment);
-
-    }
-
-    private void cacheRenderTrack(){
-
-        modelCache.begin(camera);
-        for (TrackSection track : trackGenerator.getPreviousSections()) {
-            modelCache.add(track.getSideObjects());
-        }
-
-        // render current
-        modelCache.add(trackGenerator.getCurrentTrackSection().getSideObjects());
-
-        // render next
-        modelCache.add(trackGenerator.getNextSection().getSideObjects());
-
-        modelCache.end();
-        modelBatch.render(modelCache, environment);
-    }
 
     private void renderTrackPass() {
         modelBatch.begin(camera);
@@ -377,7 +331,7 @@ public class GameScreen extends ScreenAdapter {
 
         modelBatch.end();
 
-        cacheRenderTrack();
+        //cacheRenderTrack();
 
 
     }
@@ -393,16 +347,13 @@ public class GameScreen extends ScreenAdapter {
         // Render previous
         for (TrackSection track : trackGenerator.getPreviousSections()){
             track.render(shadowBatch, environment);
-            track.sideRender(shadowBatch, environment);
         }
 
         // render current
         trackGenerator.getCurrentTrackSection().render(shadowBatch, environment);
-        trackGenerator.getCurrentTrackSection().sideRender(shadowBatch, environment);
 
         // render next
         trackGenerator.getNextSection().render(shadowBatch, environment);
-        trackGenerator.getNextSection().sideRender(shadowBatch, environment);
 
         shadowBatch.end();
         shadowLight.end();

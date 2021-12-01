@@ -21,7 +21,7 @@ public class GuiStage extends Stage {
     private BeeRunner beeRunner;
     private GameScreen gameScreen;
 
-    Table table = new Table();
+    private Table mainTable = new Table();
 
     // Distance traveled, need to record for high scores
     private Label distance;
@@ -63,32 +63,41 @@ public class GuiStage extends Stage {
         heart = skin.getDrawable("heart");
         damage = skin.getDrawable("heart_out");
 
+        addActor(mainTable);
+        mainTable.setFillParent(true);
+        mainTable.top();
 
-        distance = new Label("Distance:", skin);
-        //energyBar = new ProgressBar(0, player.getMaxEnergy(), 1, false, skin);
-        energyBar = new EnergyBar(skin, player);
-        flowers = new Label("Flower: ", skin);
+        Table healthBar = new Table(skin);
+        healthBar.background("panel");
+        mainTable.add(healthBar).size(200, 60).expandX();
+        for (int i = 0; i < player.getMaxLives(); i++) {
+            Image heart = new Image(skin.getDrawable("heart"));
+            healthBar.add(heart).pad(2).size(24);
+            hearts.add(heart);
+        }
 
-        addActor(table);
-        table.setFillParent(true);
-        table.left().top();
-
-        table.padLeft(10);
+        Table distanceTable = new Table(skin);
+        distanceTable.background("panel");
+        distanceTable.add("Distance: ", "yellow");
+        distance = new Label("Distance:", skin, "yellow");
+        distanceTable.add(distance);
+        mainTable.add(distanceTable).size(getWidth() * .2f, 60).padTop(5).expandX();
+        mainTable.padLeft(10);
 
         //table.debugAll();
 
-        table.add(distance).expandX().left().row();
+
+        flowers = new Label("Flower: ", skin, "yellow");
+        Table flowerTable = new Table(skin);
+        flowerTable.background("panel");
+        flowerTable.add("Flowers: ", "yellow");
+        flowerTable.add(flowers);
+        mainTable.add(flowerTable).expandX().size(200, 60).row();
 
 
-        Table healthBar = new Table();
-        table.add(healthBar).left().expandX().row();
-        for (int i = 0; i < player.getMaxLives(); i++) {
-            Image heart = new Image(skin.getDrawable("heart"));
-            healthBar.add(heart).pad(2).size(18);
-            hearts.add(heart);
-        }
-        table.add(energyBar).width(getWidth() * .2f).height(18).left().row();
-        table.add(flowers).expandX().left();
+        //energyBar = new ProgressBar(0, player.getMaxEnergy(), 1, false, skin);
+        energyBar = new EnergyBar(skin, player);
+        mainTable.add(energyBar).width(getWidth() * .2f).height(24).colspan(3).padTop(10).expandX();
     }
 
     private void addPopup(Player player, BeeRunner beeRunner) {
@@ -110,8 +119,8 @@ public class GuiStage extends Stage {
     public void act() {
         super.act();
 
-        flowers.setText("Flowers: " + player.getFlowers());
-        distance.setText("Distance: " + (int)player.getTotalDistance());
+        flowers.setText(player.getFlowers());
+        distance.setText((int)player.getTotalDistance());
         //energyBar.setValue(player.getEnergy());
 
         for (int i = 0; i < player.getMaxLives(); i++) {

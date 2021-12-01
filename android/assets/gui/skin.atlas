@@ -29,7 +29,7 @@ box_dark
   index: -1
 box_light
   rotate: false
-  xy: 913, 423
+  xy: 786, 169
   size: 20, 20
   split: 7, 7, 2, 2
   pad: 2, 2, 7, 7
@@ -60,7 +60,7 @@ textfield
   index: -1
 check-on
   rotate: false
-  xy: 179, 41
+  xy: 913, 398
   size: 14, 14
   orig: 14, 14
   offset: 0, 0
@@ -82,7 +82,7 @@ default
   index: -1
 default-pane
   rotate: false
-  xy: 375, 140
+  xy: 490, 140
   size: 5, 3
   split: 1, 1, 1, 1
   orig: 5, 3
@@ -90,7 +90,7 @@ default-pane
   index: -1
 default-rect-pad
   rotate: false
-  xy: 375, 140
+  xy: 490, 140
   size: 5, 3
   split: 1, 1, 1, 1
   orig: 5, 3
@@ -122,7 +122,7 @@ default-rect-down
   index: -1
 default-round
   rotate: false
-  xy: 935, 423
+  xy: 179, 44
   size: 12, 20
   split: 5, 5, 5, 4
   pad: 4, 4, 1, 1
@@ -131,7 +131,7 @@ default-round
   index: -1
 default-round-down
   rotate: false
-  xy: 913, 401
+  xy: 808, 169
   size: 12, 20
   split: 5, 5, 5, 4
   pad: 4, 4, 1, 1
@@ -140,7 +140,7 @@ default-round-down
   index: -1
 default-round-large
   rotate: false
-  xy: 786, 169
+  xy: 179, 66
   size: 20, 20
   split: 5, 5, 5, 4
   orig: 20, 20
@@ -164,7 +164,7 @@ default-select
   index: -1
 default-select-selection
   rotate: false
-  xy: 179, 36
+  xy: 913, 393
   size: 3, 3
   split: 1, 1, 1, 1
   orig: 3, 3
@@ -180,14 +180,14 @@ default-slider
   index: -1
 default-slider-knob
   rotate: false
-  xy: 808, 171
+  xy: 201, 68
   size: 9, 18
   orig: 9, 18
   offset: 0, 0
   index: -1
 default-splitpane
   rotate: false
-  xy: 397, 162
+  xy: 512, 162
   size: 5, 3
   split: 0, 5, 0, 0
   orig: 5, 3
@@ -203,7 +203,7 @@ default-splitpane-vertical
   index: -1
 default-window
   rotate: false
-  xy: 179, 57
+  xy: 913, 414
   size: 27, 29
   split: 4, 3, 20, 3
   orig: 27, 29
@@ -211,7 +211,7 @@ default-window
   index: -1
 frame
   rotate: false
-  xy: 375, 145
+  xy: 490, 145
   size: 20, 20
   split: 7, 7, 2, 2
   pad: 2, 2, 7, 7
@@ -239,16 +239,25 @@ mainbutton
   orig: 175, 61
   offset: 0, 0
   index: -1
+panel
+  rotate: false
+  xy: 375, 52
+  size: 113, 113
+  split: 29, 27, 29, 26
+  pad: 45, 44, 28, 29
+  orig: 113, 113
+  offset: 0, 0
+  index: -1
 selection
   rotate: false
-  xy: 208, 69
+  xy: 942, 426
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 tree-minus
   rotate: false
-  xy: 208, 72
+  xy: 942, 429
   size: 14, 14
   orig: 14, 14
   offset: 0, 0
@@ -262,7 +271,7 @@ tree-plus
   index: -1
 white
   rotate: false
-  xy: 195, 52
+  xy: 929, 409
   size: 3, 3
   orig: 3, 3
   offset: 0, 0

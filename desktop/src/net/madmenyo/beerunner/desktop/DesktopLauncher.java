@@ -9,7 +9,7 @@ import net.madmenyo.beerunner.BeeRunner;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 
-		//PackGui();
+		PackGui();
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1280;
