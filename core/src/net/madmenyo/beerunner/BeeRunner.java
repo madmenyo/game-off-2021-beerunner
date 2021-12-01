@@ -28,10 +28,9 @@ public class BeeRunner extends Game {
 		menuMusic = assetManager.get(Assets.menuMusic);
 		menuMusic.setVolume(.6f);
 		menuMusic.setLooping(true);
-		menuMusic.play();
 
 		gameMusic = assetManager.get(Assets.gameMusic);
-		gameMusic.setVolume(.6f);
+		gameMusic.setVolume(.1f);
 		gameMusic.setLooping(true);
 
 		menuScreen = new MenuScreen(this);

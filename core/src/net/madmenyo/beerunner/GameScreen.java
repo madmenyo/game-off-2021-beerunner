@@ -205,7 +205,7 @@ public class GameScreen extends ScreenAdapter {
 
         beeRunner.menuMusic.setVolume(0);
         beeRunner.gameMusic.setPosition(0);
-        beeRunner.gameMusic.setVolume(.6f);
+        beeRunner.gameMusic.setVolume(.3f);
         beeRunner.gameMusic.play();
 
         InputMultiplexer im = new InputMultiplexer(gui, playerController, new GestureDetector(playerController), fpsController);
@@ -237,7 +237,8 @@ public class GameScreen extends ScreenAdapter {
             //trackGenerator.setCameraBehind(camera, player, shapeRenderer);
 
             float volume = player.getHeight() / player.getMaxHeight();
-            beeSound.setVolume(beeSoundId, volume * .6f);
+            if (player.getLives() > 0) beeSound.setVolume(beeSoundId, volume * .6f);
+            else beeSound.stop();
 
             playerController.update(delta);
 
@@ -264,66 +265,9 @@ public class GameScreen extends ScreenAdapter {
         modelBatch.render(envMap);
         modelBatch.end();
 
-        /*
-        cacheAllInstances();
-
-        // render shadow
-        shadowLight.begin(tmp.set(camera.position), camera.direction);
-        shadowBatch.begin(shadowLight.getCamera());
-
-        shadowBatch.render(modelCache, environment);
-
-        shadowBatch.end();
-        shadowLight.end();
-
-        // render models
-
-        modelBatch.begin(camera);
-        modelBatch.render(modelCache, environment);
-        modelBatch.end();
-
-         */
 
         renderShadowPass();
         renderTrackPass();
-
-
-        /*
-
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        boolean hit = false;
-
-        //player.getBounds().mul(player.getModelInstance().transform).getCorner000(tmp);
-        shapeRenderer.setColor(Color.YELLOW);
-        for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
-            //object.drawBounds(shapeRenderer);
-            //object.getBounds().getCorner000(tmp);
-            //shapeRenderer.box(tmp.x, tmp.y, tmp.z, object.getBounds().getWidth(), object.getBounds().getHeight(), -object.getBounds().getDepth());
-
-            if (player.getBounds().intersects(object.getBounds())){
-                if (object instanceof Obstacle && !((Obstacle)object).isHit())
-                    hit = true;
-            }
-
-        }
-
-        if (hit) shapeRenderer.setColor(Color.RED);
-        else {
-            shapeRenderer.setColor(Color.GREEN);
-        }
-        //player.drawBounds(shapeRenderer);
-
-        /*
-        player.getBounds().getCorner000(tmp);
-        shapeRenderer.box(tmp.x, tmp.y, tmp.z, player.getBounds().getWidth(), player.getBounds().getHeight(), -player.getBounds().getDepth());
-
-
-
-
-        shapeRenderer.end();
-         */
 
         gui.draw();
     }
@@ -333,24 +277,12 @@ public class GameScreen extends ScreenAdapter {
         modelBatch.begin(camera);
         modelBatch.render(player.getModelInstance(), environment);
 
-        // Render tracks
-        // Render previous
         for (TrackSection track : trackGenerator.getTrackSections()) {
             track.render(modelBatch, environment);
         }
 
-        // render current
-        //trackGenerator.getCurrentTrackSection().render(modelBatch, environment);
-
-        // render next
-        //trackGenerator.getNextSection().render(modelBatch, environment);
-
 
         modelBatch.end();
-
-        //cacheRenderTrack();
-
-
     }
 
     private void renderShadowPass() {

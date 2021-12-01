@@ -66,6 +66,10 @@ public class MenuScreen extends ScreenAdapter {
         mainTable.add(createButtonTable()).padTop(200).padLeft(100);
 
         Gdx.input.setInputProcessor(stage);
+
+        beeRunner.menuMusic.setPosition(0);
+        beeRunner.menuMusic.setVolume(.3f);
+        beeRunner.menuMusic.play();
     }
     private Table createButtonTable() {
         Table buttonTable = new Table();

@@ -31,7 +31,7 @@ public class Pickup extends CollisionObject{
         if (pickedUp) return;
         pickedUp = true;
         player.addFlower();
-        assetManager.get(Assets.pickup).play(1);
+        assetManager.get(Assets.pickup).play(.5f);
 
     }
 
