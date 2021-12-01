@@ -61,6 +61,10 @@ public class GuiStage extends Stage {
         profilerOverlay.setProfiling(false);
     }
 
+    /**
+     * Add all hud elements
+     * @param player
+     */
     private void addHud(Player player) {
         heart = skin.getDrawable("heart");
         damage = skin.getDrawable("heart_out");
@@ -102,6 +106,11 @@ public class GuiStage extends Stage {
         mainTable.add(energyBar).width(getWidth() * .2f).height(24).colspan(3).padTop(10).expandX();
     }
 
+    /**
+     * Add popup to display pause and gameover
+     * @param player
+     * @param beeRunner
+     */
     private void addPopup(Player player, BeeRunner beeRunner) {
         popupTable = new PopupTable(skin, player, beeRunner);
         addActor(popupTable);
@@ -109,6 +118,9 @@ public class GuiStage extends Stage {
         popupTable.setVisible(false);
     }
 
+    /**
+     * Add profiler, displayed by pressing F3
+     */
     private void addProfileOverlay() {
         profilerOverlay = new ProfilerOverlay(skin);
         profilerOverlay.setFillParent(true);

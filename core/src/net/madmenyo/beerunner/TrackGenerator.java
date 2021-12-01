@@ -25,10 +25,6 @@ public class TrackGenerator {
     private AssetManager assetManager;
     private ICurveGenerator curveGenerator;
 
-    /** The current track **/
-    private TrackSection currentTrackSection;
-
-    private TrackSection nextSection;
 
     private final List<TrackSection> trackSections = new ArrayList<>();
 
@@ -43,8 +39,10 @@ public class TrackGenerator {
     private float lastObstacleDistance = 0;
     private float lastResourceDistance = 0;
 
-    private Vector3 tmp1 = new Vector3();
-    private Vector3 tmp2 = new Vector3();
+    private final Vector3 tmp1 = new Vector3();
+    private final Vector3 tmp2 = new Vector3();
+
+    private Player player;
 
     // ---
 
@@ -64,34 +62,6 @@ public class TrackGenerator {
         nextTrack();
         nextTrack();
 
-    }
-
-    private void generateStartTrack() {
-        currentTrackSection = Pools.obtain(TrackSection.class);
-        currentTrackSection.init(curveGenerator.getCurve());
-
-        ModelCache modelCache = currentTrackSection.getSideObjectCache();
-        modelCache.begin();
-        // Ridiculously repetitively... :)
-        placeSideTrees(currentTrackSection, modelCache);
-        //placeCollisionObjects(currentTrackSection);
-        //placePickup(currentTrackSection);
-        placeSideRocks(currentTrackSection, modelCache);
-        modelCache.end();
-
-        //nextSection = new TrackSection(curveGenerator.getCurve());
-        nextSection = Pools.obtain(TrackSection.class);
-        nextSection.init(curveGenerator.getCurve());
-
-        modelCache = nextSection.getSideObjectCache();
-        modelCache.begin();
-
-        placeSideTrees(nextSection, modelCache);
-        //placeCollisionObjects(nextSection);
-        placePickup(nextSection);
-        placeSideRocks(nextSection, modelCache);
-
-        modelCache.end();
     }
 
     /**
@@ -123,8 +93,6 @@ public class TrackGenerator {
             TrackSection t = trackSections.remove(0);
             Pools.free(t);
         }
-
-        currentTrackSection = nextSection;
         //nextSection = new TrackSection(curveGenerator.getCurve());
         TrackSection nextSection = Pools.obtain(TrackSection.class);
         trackSections.add(nextSection);
@@ -159,9 +127,16 @@ public class TrackGenerator {
      * @param track
      */
     private void placePickup(TrackSection track) {
+        float rockMultiplier = .2f;
+        if (player != null) {
+            rockMultiplier = player.getTotalDistance() / 2000;
+            rockMultiplier = MathUtils.clamp(rockMultiplier, .5f, 3);
+        }
+
+        //System.out.println("Chance of rock spawning: " + 25 * rockMultiplier);
         for (float d = 0; d  < track.getCurveLength(); ) {
 
-            boolean rock = MathUtils.random(100) < 30;
+            boolean rock = MathUtils.random(100) < 25 * rockMultiplier;
 
             d += MathUtils.random() * 60 + 2;
 
@@ -353,6 +328,11 @@ public class TrackGenerator {
         getCurrentTrackSection().findT(100);
     }
 
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    /*
     public void setCameraBehind(PerspectiveCamera camera, Player player, ShapeRenderer shapeRenderer){
 
         float t = player.gettCurve();
@@ -380,7 +360,7 @@ public class TrackGenerator {
         camera.up.set(Vector3.Y);
         camera.update();
 
-    }
+    }*/
 
 
 }
