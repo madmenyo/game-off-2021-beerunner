@@ -288,6 +288,7 @@ public class GameScreen extends ScreenAdapter {
         renderTrackPass();
 
 
+        /*
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -318,11 +319,11 @@ public class GameScreen extends ScreenAdapter {
         player.getBounds().getCorner000(tmp);
         shapeRenderer.box(tmp.x, tmp.y, tmp.z, player.getBounds().getWidth(), player.getBounds().getHeight(), -player.getBounds().getDepth());
 
-         */
 
 
 
         shapeRenderer.end();
+         */
 
         gui.draw();
     }
@@ -334,15 +335,15 @@ public class GameScreen extends ScreenAdapter {
 
         // Render tracks
         // Render previous
-        for (TrackSection track : trackGenerator.getPreviousSections()) {
+        for (TrackSection track : trackGenerator.getTrackSections()) {
             track.render(modelBatch, environment);
         }
 
         // render current
-        trackGenerator.getCurrentTrackSection().render(modelBatch, environment);
+        //trackGenerator.getCurrentTrackSection().render(modelBatch, environment);
 
         // render next
-        trackGenerator.getNextSection().render(modelBatch, environment);
+        //trackGenerator.getNextSection().render(modelBatch, environment);
 
 
         modelBatch.end();
@@ -361,7 +362,7 @@ public class GameScreen extends ScreenAdapter {
         shadowBatch.render(player.getModelInstance(), environment);
         // Shadow Render tracks
         // Render previous
-        for (TrackSection track : trackGenerator.getPreviousSections()){
+        for (TrackSection track : trackGenerator.getTrackSections()){
             track.render(shadowBatch, environment);
         }
 
@@ -376,7 +377,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void trackCollision() {
-        for (TrackSection track : trackGenerator.getPreviousSections()){
+        for (TrackSection track : trackGenerator.getTrackSections()){
             track.handleCollisions(player);
         }
 

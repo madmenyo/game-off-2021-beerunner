@@ -261,13 +261,14 @@ public class TrackSection implements Disposable, Pool.Poolable {
     @Override
     public void dispose() {
         track.model.dispose();
+        sideObjectCache.dispose();
 
         // Currently there are spheres being generated that are not disposed. Eventually these will
         // be models that are reused every track piece and only need disposing after level finished
     }
 
     /**
-     * Generates the mesh
+     * Generates the terrain mesh of this section
      * @param sectionDistance
      */
     private void generateMesh(float sectionDistance){
@@ -421,9 +422,6 @@ public class TrackSection implements Disposable, Pool.Poolable {
             derivative.rotate(90, -derivative.z,0,  derivative.x);
 
             renderer.line(position.x, position.y, position.z, position.x + derivative.x, position.y + derivative.y, position.z + derivative.z);
-
-            // This hack in the end point by just placing it on the end when near the end or past
-            // the curve
         }
 
     }
@@ -470,5 +468,6 @@ public class TrackSection implements Disposable, Pool.Poolable {
 
     @Override
     public void reset() {
+        collisionObjects.clear();
     }
 }

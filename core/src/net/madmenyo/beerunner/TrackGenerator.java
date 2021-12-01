@@ -2,31 +2,24 @@ package net.madmenyo.beerunner;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pools;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Responsible for generating tracks on demand and keeping records.
  *
  * Code starting to get one huge mesh but only 3 days left... need... more... time...
+ *
+ * The current track is tracksections(1), previous (o) or it disapears and at least one more track to see further.
  */
 public class TrackGenerator {
     private AssetManager assetManager;
@@ -37,7 +30,8 @@ public class TrackGenerator {
 
     private TrackSection nextSection;
 
-    private final List<TrackSection> previousSections = new ArrayList<>();
+    private final List<TrackSection> trackSections = new ArrayList<>();
+
 
     // Catch lists
     private List<ModelInstance> treeInstances = new ArrayList<>();
@@ -62,17 +56,27 @@ public class TrackGenerator {
 
 
         //currentTrackSection = new TrackSection(curveGenerator.getCurve());
+
+        //generateStartTrack();
+
+        nextTrack();
+        nextTrack();
+        nextTrack();
+        nextTrack();
+
+    }
+
+    private void generateStartTrack() {
         currentTrackSection = Pools.obtain(TrackSection.class);
         currentTrackSection.init(curveGenerator.getCurve());
-
 
         ModelCache modelCache = currentTrackSection.getSideObjectCache();
         modelCache.begin();
         // Ridiculously repetitively... :)
-        placeSideObjects(currentTrackSection, modelCache);
+        placeSideTrees(currentTrackSection, modelCache);
         //placeCollisionObjects(currentTrackSection);
         //placePickup(currentTrackSection);
-        placeEdges(currentTrackSection, modelCache);
+        placeSideRocks(currentTrackSection, modelCache);
         modelCache.end();
 
         //nextSection = new TrackSection(curveGenerator.getCurve());
@@ -82,15 +86,17 @@ public class TrackGenerator {
         modelCache = nextSection.getSideObjectCache();
         modelCache.begin();
 
-        placeSideObjects(nextSection, modelCache);
+        placeSideTrees(nextSection, modelCache);
         //placeCollisionObjects(nextSection);
         placePickup(nextSection);
-        placeEdges(nextSection, modelCache);
+        placeSideRocks(nextSection, modelCache);
 
         modelCache.end();
-
     }
 
+    /**
+     * Improvement on creating new modelinstances from the AssetDescriptors I pass to assetmanager.
+     */
     private void fillCacheInstances() {
         for (AssetDescriptor<Model> rock : Assets.rocks){
             rockInstances.add(new ModelInstance(assetManager.get(rock)));
@@ -100,27 +106,34 @@ public class TrackGenerator {
         }
     }
 
-
+    /**
+     * This generates a track, takes +- 7mms on desktop system and showing a big hickup on the
+     * already slow webGL
+     *
+     * Added pooling to reuse track pieces
+     * @return
+     */
     public float nextTrack() {
         long time = System.currentTimeMillis();
         // For now stay on current track and reset t
-        previousSections.add(currentTrackSection);
-        if (previousSections.size() > 2){
-            previousSections.get(1).dispose();
+        //trackSections.add(currentTrackSection);
+        if (trackSections.size() > 3){
+            trackSections.get(0).dispose();
 
-            TrackSection t = previousSections.remove(1);
+            TrackSection t = trackSections.remove(0);
             Pools.free(t);
         }
         currentTrackSection = nextSection;
         //nextSection = new TrackSection(curveGenerator.getCurve());
-        nextSection = Pools.obtain(TrackSection.class);
+        TrackSection nextSection = Pools.obtain(TrackSection.class);
+        trackSections.add(nextSection);
         nextSection.init(curveGenerator.getCurve());
 
 
         ModelCache modelCache = nextSection.getSideObjectCache();
         modelCache.begin();
-        placeSideObjects(nextSection, modelCache);
-        placeEdges(nextSection, modelCache);
+        placeSideTrees(nextSection, modelCache);
+        placeSideRocks(nextSection, modelCache);
         modelCache.end();
         placePickup(nextSection);
 
@@ -137,6 +150,8 @@ public class TrackGenerator {
 
     /**
      * Just add pickup flowers randomly
+     *
+     * Pickups are not being cached by a modelcache because I need to remove or move them at any time
      * @param track
      */
     private void placePickup(TrackSection track) {
@@ -185,9 +200,13 @@ public class TrackGenerator {
 
     /**
      * No more time left, just hack in some objects to give the world some live
+     *
+     * Sideobjects are cached by the modelCache, eventually modelCache just has 1 renderable
+     *
+     * rocks and trees could be combined as wel as left and right side in a single loop.
      * @param track
      */
-    private void placeSideObjects(TrackSection track, ModelCache modelCache) {
+    private void placeSideTrees(TrackSection track, ModelCache modelCache) {
 
         // Left side
         for (float d = 0; d  < track.getCurveLength(); ) {
@@ -246,9 +265,13 @@ public class TrackGenerator {
 
     /**
      * No more time left, just hack in some objects to give the world some live
+     *
+     * edge rocks are cached by the modelCache, eventually modelCache just has 1 renderable
+     *
+     * rocks and trees could be combined as wel as left and right side in a single loop.
      * @param track
      */
-    private void placeEdges(TrackSection track, ModelCache modelCache) {
+    private void placeSideRocks(TrackSection track, ModelCache modelCache) {
 
         // Left side
         for (float d = 0; d  < track.getCurveLength(); ) {
@@ -308,15 +331,18 @@ public class TrackGenerator {
 
 
     public TrackSection getCurrentTrackSection() {
-        return currentTrackSection;
+        return trackSections.get(1);
+        //return currentTrackSection;
     }
 
     public TrackSection getNextSection() {
-        return nextSection;
+        return trackSections.get(2);
+
+        //return nextSection;
     }
 
-    public List<TrackSection> getPreviousSections() {
-        return previousSections;
+    public List<TrackSection> getTrackSections() {
+        return trackSections;
     }
 
     private void addObstacle(){
@@ -332,8 +358,8 @@ public class TrackGenerator {
         TrackSection trackSection;
 
         if (t < 0){
-            if (!previousSections.isEmpty()) {
-                trackSection = previousSections.get(previousSections.size() - 1);
+            if (!trackSections.isEmpty()) {
+                trackSection = trackSections.get(trackSections.size() - 1);
 
                 t = 1 + t;
             } else {
