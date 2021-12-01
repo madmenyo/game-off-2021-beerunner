@@ -1,5 +1,6 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
@@ -449,11 +450,11 @@ public class TrackSection implements Disposable, Pool.Poolable {
 
     }
 
-    public void handleCollisions(Player player){
+    public void handleCollisions(Player player, AssetManager assetManager){
         for (CollisionObject object : collisionObjects){
 
             if (player.getBounds().intersects(object.getBounds())){
-                object.onCollision(player);
+                object.onCollision(player, assetManager);
             }
         }
     }

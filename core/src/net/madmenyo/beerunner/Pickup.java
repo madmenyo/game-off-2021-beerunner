@@ -1,5 +1,6 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -25,11 +26,13 @@ public class Pickup extends CollisionObject{
     }
 
     @Override
-    public void onCollision(Player player) {
+    public void onCollision(Player player, AssetManager assetManager) {
         // add resource or initialize powerup
         if (pickedUp) return;
         pickedUp = true;
         player.addFlower();
+        assetManager.get(Assets.pickup).play(1);
+
     }
 
     @Override

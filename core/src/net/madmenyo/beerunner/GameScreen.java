@@ -378,14 +378,14 @@ public class GameScreen extends ScreenAdapter {
 
     private void trackCollision() {
         for (TrackSection track : trackGenerator.getTrackSections()){
-            track.handleCollisions(player);
+            track.handleCollisions(player, beeRunner.assetManager);
         }
 
         // render current
-        trackGenerator.getCurrentTrackSection().handleCollisions(player);
+        trackGenerator.getCurrentTrackSection().handleCollisions(player, beeRunner.assetManager);
 
         // render next
-        trackGenerator.getNextSection().handleCollisions(player);
+        trackGenerator.getNextSection().handleCollisions(player, beeRunner.assetManager );
     }
 
     @Override

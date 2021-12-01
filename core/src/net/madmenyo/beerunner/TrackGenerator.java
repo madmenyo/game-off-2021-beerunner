@@ -123,6 +123,7 @@ public class TrackGenerator {
             TrackSection t = trackSections.remove(0);
             Pools.free(t);
         }
+
         currentTrackSection = nextSection;
         //nextSection = new TrackSection(curveGenerator.getCurve());
         TrackSection nextSection = Pools.obtain(TrackSection.class);
@@ -135,6 +136,9 @@ public class TrackGenerator {
         placeSideTrees(nextSection, modelCache);
         placeSideRocks(nextSection, modelCache);
         modelCache.end();
+
+        // If first track do not load pickups
+        if (trackSections.size() <3) return 0f;
         placePickup(nextSection);
 
         System.out.println("Generated track in: " + (System.currentTimeMillis() - time) + "ms.");

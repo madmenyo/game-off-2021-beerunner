@@ -1,5 +1,6 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -31,7 +32,7 @@ public class Obstacle extends CollisionObject{
     }
 
     @Override
-    public void onCollision(Player player) {
+    public void onCollision(Player player, AssetManager assetManager) {
 
         // Don't hit same obstacle twice
         if (hit) return;
@@ -41,6 +42,8 @@ public class Obstacle extends CollisionObject{
         // should crash and lose life or game over
         hit = true;
         player.bump();
+
+        assetManager.get(Assets.rock).play(1);
 
     }
 

@@ -1,5 +1,6 @@
 package net.madmenyo.beerunner;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -41,7 +42,7 @@ public abstract class CollisionObject {
         return modelInstance;
     }
 
-    public abstract void onCollision(Player player);
+    public abstract void onCollision(Player player, AssetManager assetManager);
 
     public abstract void update(float delta);
 

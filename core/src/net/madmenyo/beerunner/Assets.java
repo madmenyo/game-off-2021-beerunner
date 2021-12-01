@@ -33,6 +33,8 @@ public class Assets {
 
     public static final AssetDescriptor<Sound> click = new AssetDescriptor<Sound>("sound/click.wav", Sound.class);
     public static final AssetDescriptor<Sound> bee = new AssetDescriptor<Sound>("sound/bee.wav", Sound.class);
+    public static final AssetDescriptor<Sound> rock = new AssetDescriptor<Sound>("sound/rock.wav", Sound.class);
+    public static final AssetDescriptor<Sound> pickup = new AssetDescriptor<Sound>("sound/pickup.wav", Sound.class);
 
     private AssetManager assetManager = new AssetManager();
 
@@ -47,6 +49,8 @@ public class Assets {
 
         assetManager.load(click);
         assetManager.load(bee);
+        assetManager.load(rock);
+        assetManager.load(pickup);
 
         assetManager.load(menuMusic);
         assetManager.load(gameMusic);
