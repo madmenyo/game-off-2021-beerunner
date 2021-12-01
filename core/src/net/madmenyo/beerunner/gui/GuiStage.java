@@ -44,6 +44,8 @@ public class GuiStage extends Stage {
 
     private PopupTable popupTable;
 
+    private ProfilerOverlay profilerOverlay;
+
 
     public GuiStage(Viewport viewport, Batch batch, Player player, BeeRunner beeRunner, GameScreen gameScreen) {
         super(viewport, batch);
@@ -86,6 +88,10 @@ public class GuiStage extends Stage {
         addActor(popupTable);
         popupTable.setFillParent(true);
         popupTable.setVisible(false);
+
+        profilerOverlay = new ProfilerOverlay(skin);
+        profilerOverlay.setFillParent(true);
+        addActor(profilerOverlay);
     }
 
     private boolean gameOver = false;
