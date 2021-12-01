@@ -33,7 +33,7 @@ public class GuiStage extends Stage {
     private EnergyBar energyBar;
 
     // Some form of currency in game?
-    private Label honey;
+    private Label flowers;
 
     private Player player;
 
@@ -54,6 +54,12 @@ public class GuiStage extends Stage {
         this.beeRunner = beeRunner;
         this.gameScreen = gameScreen;
 
+        addHud(player);
+        addPopup(player, beeRunner);
+        addProfileOverlay();
+    }
+
+    private void addHud(Player player) {
         heart = skin.getDrawable("heart");
         damage = skin.getDrawable("heart_out");
 
@@ -61,7 +67,7 @@ public class GuiStage extends Stage {
         distance = new Label("Distance:", skin);
         //energyBar = new ProgressBar(0, player.getMaxEnergy(), 1, false, skin);
         energyBar = new EnergyBar(skin, player);
-        honey = new Label("Honey: ", skin);
+        flowers = new Label("Flower: ", skin);
 
         addActor(table);
         table.setFillParent(true);
@@ -82,13 +88,17 @@ public class GuiStage extends Stage {
             hearts.add(heart);
         }
         table.add(energyBar).width(getWidth() * .2f).height(18).left().row();
-        table.add(honey).expandX().left();
+        table.add(flowers).expandX().left();
+    }
 
+    private void addPopup(Player player, BeeRunner beeRunner) {
         popupTable = new PopupTable(skin, player, beeRunner);
         addActor(popupTable);
         popupTable.setFillParent(true);
         popupTable.setVisible(false);
+    }
 
+    private void addProfileOverlay() {
         profilerOverlay = new ProfilerOverlay(skin);
         profilerOverlay.setFillParent(true);
         addActor(profilerOverlay);
@@ -100,7 +110,7 @@ public class GuiStage extends Stage {
     public void act() {
         super.act();
 
-        honey.setText("Flowers: " + player.getFlowers());
+        flowers.setText("Flowers: " + player.getFlowers());
         distance.setText("Distance: " + (int)player.getTotalDistance());
         //energyBar.setValue(player.getEnergy());
 

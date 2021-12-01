@@ -3,6 +3,7 @@ package net.madmenyo.beerunner;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 
 public class Pickup extends CollisionObject{
 
@@ -29,6 +30,10 @@ public class Pickup extends CollisionObject{
         if (pickedUp) return;
         pickedUp = true;
         player.addFlower();
+    }
 
+    @Override
+    public boolean shouldRender() {
+        return !pickedUp;
     }
 }

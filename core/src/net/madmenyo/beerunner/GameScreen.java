@@ -3,35 +3,30 @@ package net.madmenyo.beerunner;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.CubemapAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -50,6 +45,7 @@ public class GameScreen extends ScreenAdapter {
     private ShapeRenderer shapeRenderer;
     private Environment environment;
     private ModelBatch modelBatch;
+    private ModelCache modelCache;
 
     private BeeRunner beeRunner;
 
@@ -87,52 +83,25 @@ public class GameScreen extends ScreenAdapter {
         beeSound = beeRunner.assetManager.get(Assets.bee);
         beeSoundId = beeSound.loop(.06f);
 
-
         camera = new PerspectiveCamera(67, 1920, 1080);
         viewport = new ExtendViewport(1920, 1080, camera);
+
+        createCubeEnvironment();
+
+        CreateRenderEnvironment();
 
         spriteBatch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
 
-        Cubemap cubemap = getCubemap();
-
-        environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f),
-                new CubemapAttribute(CubemapAttribute.EnvironmentMap,  cubemap));
-
-        //DirectionalLight light = new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f);
-        /*
-        shadowLight = new DirectionalShadowLight(
-                1048, 1048,
-                viewport.getWorldWidth(), viewport.getWorldHeight(),
-                1, 300);
-         */
-
-        environment.add((shadowLight = new DirectionalShadowLight(2048, 2048,
-                600, 600,
-                .1f, 2000f))
-                .set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
-                //.set(1f, 1f, 1f, 40.0f, -35f, -35f));
-        environment.shadowMap = shadowLight;
-
-
-
         shadowBatch = new ModelBatch(new DepthShaderProvider());
         modelBatch = new ModelBatch();
 
+        // Should use a mesh pool to reduce GC load
+        modelCache = new ModelCache();
+
         trackGenerator = new TrackGenerator(beeRunner.assetManager);
 
-
-        /*
-        ModelBuilder modelBuilder = new ModelBuilder();
-        modelBuilder.begin();
-        MeshPartBuilder meshBuilder;
-        meshBuilder = modelBuilder.part("part1", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material());
-        SphereShapeBuilder.build(meshBuilder, 2, 1, 2, 16, 12);
-        player = new Player(new ModelInstance(modelBuilder.end()), trackGenerator);
-
-         */
 
         G3dModelLoader modelLoader = new G3dModelLoader(new JsonReader());
         player = new Player(new ModelInstance(modelLoader.loadModel(Gdx.files.internal("models/bee.g3dj"))), trackGenerator);
@@ -146,7 +115,22 @@ public class GameScreen extends ScreenAdapter {
         font = new BitmapFont(Gdx.files.internal("gui/default.fnt"));
     }
 
-    private Cubemap getCubemap() {
+    private void CreateRenderEnvironment() {
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
+
+        environment.add((shadowLight = new DirectionalShadowLight(2048, 2048,
+                600, 600,
+                .1f, 2000f))
+                .set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+        //.set(1f, 1f, 1f, 40.0f, -35f, -35f));
+        environment.shadowMap = shadowLight;
+    }
+
+    /**
+     * Creates a cube map to render fixed around the camera
+     */
+    private void createCubeEnvironment() {
         int attr = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
         mb.begin();
         mb.part("front", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(new Texture("models/cubemap/front.png"))))
@@ -193,25 +177,6 @@ public class GameScreen extends ScreenAdapter {
                         -1,0,0);
         envMap = new ModelInstance(mb.end());
         envMap.transform.scl(200);
-
-        cube = new EnvironmentCubemap(
-                Gdx.files.internal("models/cubemap/left.png"),
-                Gdx.files.internal("models/cubemap/right.png"),
-                Gdx.files.internal("models/cubemap/top.png"),
-                Gdx.files.internal("models/cubemap/bottom.png"),
-                Gdx.files.internal("models/cubemap/back.png"),
-                Gdx.files.internal("models/cubemap/front.png")
-        );
-
-        Cubemap cubemap = new Cubemap(
-                Gdx.files.internal("models/cubemap/left.png"),
-                Gdx.files.internal("models/cubemap/right.png"),
-                Gdx.files.internal("models/cubemap/top.png"),
-                Gdx.files.internal("models/cubemap/bottom.png"),
-                Gdx.files.internal("models/cubemap/back.png"),
-                Gdx.files.internal("models/cubemap/front.png")
-        );
-        return cubemap;
     }
 
 
@@ -277,17 +242,31 @@ public class GameScreen extends ScreenAdapter {
         ScreenUtils.clear(.1f, .12f, .16f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        //cube.render(camera);
 
+        // Render cube environment
         modelBatch.begin(camera);
-
         modelBatch.render(envMap);
-
         modelBatch.end();
 
-        renderShadowPass();
+        cacheAllInstances();
 
-        renderTrackPass();
+        // render shadow
+        shadowLight.begin(tmp.set(camera.position), camera.direction);
+        shadowBatch.begin(shadowLight.getCamera());
+
+        shadowBatch.render(modelCache, environment);
+
+        shadowBatch.end();
+        shadowLight.end();
+
+        // render models
+
+        modelBatch.begin(camera);
+        modelBatch.render(modelCache, environment);
+        modelBatch.end();
+
+        //renderShadowPass();
+        //renderTrackPass();
 
 
 
@@ -329,6 +308,56 @@ public class GameScreen extends ScreenAdapter {
         gui.draw();
     }
 
+    private void cacheAllInstances(){
+        modelCache.begin(camera);
+        modelCache.add(player.getModelInstance());
+
+
+        for (TrackSection track : trackGenerator.getPreviousSections()) {
+            modelCache.add(track.getSideObjects());
+            modelCache.add(track.getTrack());
+            for (CollisionObject o : track.getCollisionObjects()) {
+                if (o.shouldRender()) modelCache.add(o.modelInstance);
+            }
+        }
+
+        // render current
+        modelCache.add(trackGenerator.getCurrentTrackSection().getSideObjects());
+        modelCache.add(trackGenerator.getCurrentTrackSection().getTrack());
+        for (CollisionObject o : trackGenerator.getCurrentTrackSection().getCollisionObjects()) {
+            if (o.shouldRender()) modelCache.add(o.modelInstance);
+        }
+
+        // render next
+        modelCache.add(trackGenerator.getNextSection().getSideObjects());
+        modelCache.add(trackGenerator.getNextSection().getTrack());
+        for (CollisionObject o : trackGenerator.getNextSection().getCollisionObjects()) {
+            if (o.shouldRender()) modelCache.add(o.modelInstance);
+        }
+
+
+        modelCache.end();
+        modelBatch.render(modelCache, environment);
+
+    }
+
+    private void cacheRenderTrack(){
+
+        modelCache.begin(camera);
+        for (TrackSection track : trackGenerator.getPreviousSections()) {
+            modelCache.add(track.getSideObjects());
+        }
+
+        // render current
+        modelCache.add(trackGenerator.getCurrentTrackSection().getSideObjects());
+
+        // render next
+        modelCache.add(trackGenerator.getNextSection().getSideObjects());
+
+        modelCache.end();
+        modelBatch.render(modelCache, environment);
+    }
+
     private void renderTrackPass() {
         modelBatch.begin(camera);
         modelBatch.render(player.getModelInstance(), environment);
@@ -346,38 +375,15 @@ public class GameScreen extends ScreenAdapter {
         trackGenerator.getNextSection().render(modelBatch, environment);
 
 
-        /*
-            for (CollisionObject object : track.getCollisionObjects()){
-
-                if (player.getBounds().intersects(object.getBounds())){
-                    object.onCollision();
-
-                    System.out.println("Player: " + player.getBounds());
-                    System.out.println("Object: " + object.getBounds());
-                }
-                // Let the object handle drawing itself so it changes on state change
-                object.draw(modelBatch, environment);
-            }
-
-        }
-
-        for (CollisionObject object : trackGenerator.getCurrentTrackSection().getCollisionObjects()){
-
-            if (player.getBounds().intersects(object.getBounds())){
-                object.onCollision();
-
-                System.out.println("Player: " + player.getBounds());
-                System.out.println("Object: " + object.getBounds());
-            }
-            // Let the object handle drawing itself so it changes on state change
-            object.draw(modelBatch, environment);
-        }
-         */
-
         modelBatch.end();
+
+        cacheRenderTrack();
+
+
     }
 
     private void renderShadowPass() {
+
         //create shadow texture
         shadowLight.begin(tmp.set(camera.position), camera.direction);
         shadowBatch.begin(shadowLight.getCamera());
@@ -387,13 +393,16 @@ public class GameScreen extends ScreenAdapter {
         // Render previous
         for (TrackSection track : trackGenerator.getPreviousSections()){
             track.render(shadowBatch, environment);
+            track.sideRender(shadowBatch, environment);
         }
 
         // render current
         trackGenerator.getCurrentTrackSection().render(shadowBatch, environment);
+        trackGenerator.getCurrentTrackSection().sideRender(shadowBatch, environment);
 
         // render next
         trackGenerator.getNextSection().render(shadowBatch, environment);
+        trackGenerator.getNextSection().sideRender(shadowBatch, environment);
 
         shadowBatch.end();
         shadowLight.end();

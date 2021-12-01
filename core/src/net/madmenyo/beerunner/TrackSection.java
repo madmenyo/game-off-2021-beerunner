@@ -570,12 +570,21 @@ public class TrackSection implements Disposable {
         // Render everything for now
         modelBatch.render(track, environment);
 
+        /*
         for (ModelInstance mi : sideObjects){
             modelBatch.render(mi, environment);
         }
 
+         */
+
         for (CollisionObject object : collisionObjects){
             object.draw(modelBatch, environment);
+        }
+    }
+
+    public void sideRender(ModelBatch modelBatch, Environment environment){
+        for (ModelInstance mi : sideObjects){
+            modelBatch.render(mi, environment);
         }
     }
 
@@ -587,4 +596,6 @@ public class TrackSection implements Disposable {
             }
         }
     }
+
+
 }
