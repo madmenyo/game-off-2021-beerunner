@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
@@ -22,6 +23,8 @@ import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Pools;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import java.util.ArrayList;
@@ -425,9 +428,12 @@ public class TrackSection implements Disposable {
 
         modelBatch.render(sideObjectCache, environment);
 
+
         for (CollisionObject object : collisionObjects){
             object.draw(modelBatch, environment);
         }
+
+
     }
 
     public void handleCollisions(Player player){

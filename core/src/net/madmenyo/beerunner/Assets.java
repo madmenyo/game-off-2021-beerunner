@@ -56,62 +56,33 @@ public class Assets {
             System.out.println("Loading tree model...");
             AssetDescriptor<Model> treeDescriptor;
             if (i >= 10) {
-                treeDescriptor = new AssetDescriptor<>("models/trees/tree.0"+ i + ".g3dj", Model.class);
+                //treeDescriptor = new AssetDescriptor<>("models/trees/tree.0"+ i + ".g3dj", Model.class);
+                treeDescriptor = new AssetDescriptor<>("models/combined/tree.0"+ i + ".g3dj", Model.class);
+
             } else {
-                treeDescriptor = new AssetDescriptor<>("models/trees/tree.00"+ i + ".g3dj", Model.class);
+                //treeDescriptor = new AssetDescriptor<>("models/trees/tree.00"+ i + ".g3dj", Model.class);
+                treeDescriptor = new AssetDescriptor<>("models/combined/tree.00"+ i + ".g3dj", Model.class);
             }
 
             assetManager.load(treeDescriptor);
             trees.add(treeDescriptor);
         }
-        /*
-        for (FileHandle file : Gdx.files.internal("models/trees").list()){
-
-            System.out.println("Tree added...");
-            //if (file.file().getName().endsWith("png")) continue;
-
-            try {
-                AssetDescriptor<Model> treeDescriptor = new AssetDescriptor<>(file, Model.class);
-                assetManager.load(treeDescriptor);
-                trees.add(treeDescriptor);
-            } catch (GdxRuntimeException e){
-                // This skips the PNG
-                //System.out.println(e.getMessage());
-            }
-        }
-
-         */
 
         System.out.println("Adding rock models...");
         for (int i = 1; i <= 7; i++){
             System.out.println("Loading rock model...");
             AssetDescriptor<Model> treeDescriptor;
             if (i >= 10) {
-                treeDescriptor = new AssetDescriptor<>("models/rocks/rock_"+ i + ".g3dj", Model.class);
+                //treeDescriptor = new AssetDescriptor<>("models/rocks/rock_"+ i + ".g3dj", Model.class);
+                treeDescriptor = new AssetDescriptor<>("models/combined/rock_"+ i + ".g3dj", Model.class);
             } else {
-                treeDescriptor = new AssetDescriptor<>("models/rocks/rock_0"+ i + ".g3dj", Model.class);
+                //treeDescriptor = new AssetDescriptor<>("models/rocks/rock_0"+ i + ".g3dj", Model.class);
+                treeDescriptor = new AssetDescriptor<>("models/combined/rock_0"+ i + ".g3dj", Model.class);
             }
 
             assetManager.load(treeDescriptor);
             rocks.add(treeDescriptor);
         }
-
-        /*
-        for (FileHandle file : Gdx.files.internal("models/rocks").list()){
-
-            //if (file.file().getName().endsWith("png")) continue;
-
-            try {
-
-                AssetDescriptor<Model> rockDescriptor = new AssetDescriptor<>(file, Model.class);
-                assetManager.load(rockDescriptor);
-                rocks.add(rockDescriptor);
-            } catch (GdxRuntimeException e){
-                // This skips the PNG
-                //System.out.println(e.getMessage());
-            }
-        }
-         */
 
 
         System.out.println("Adding flower models...");
@@ -119,29 +90,14 @@ public class Assets {
             System.out.println("Loading flower model...");
             AssetDescriptor<Model> treeDescriptor;
             if (i >= 10) {
-                treeDescriptor = new AssetDescriptor<>("models/flowers/flower_"+ i + ".g3dj", Model.class);
+                treeDescriptor = new AssetDescriptor<>("models/combined/flower_"+ i + ".g3dj", Model.class);
             } else {
-                treeDescriptor = new AssetDescriptor<>("models/flowers/flower_0"+ i + ".g3dj", Model.class);
+                treeDescriptor = new AssetDescriptor<>("models/combined/flower_0"+ i + ".g3dj", Model.class);
             }
 
             assetManager.load(treeDescriptor);
             flowers.add(treeDescriptor);
         }
-        /*
-        for (FileHandle file : Gdx.files.internal("models/flowers").list()){
-
-            //if (file.file().getName().endsWith("png")) continue;
-            try {
-                AssetDescriptor<Model> rockDescriptor = new AssetDescriptor<>(file, Model.class);
-                assetManager.load(rockDescriptor);
-                flowers.add(rockDescriptor);
-            } catch (GdxRuntimeException e){
-                // This skips the PNG
-                //System.out.println(e.getMessage());
-            }
-        }
-
-         */
 
 
         assetManager.finishLoading();

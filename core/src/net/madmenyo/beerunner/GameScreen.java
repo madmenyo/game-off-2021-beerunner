@@ -192,7 +192,7 @@ public class GameScreen extends ScreenAdapter {
         beeRunner.gameMusic.setVolume(.6f);
         beeRunner.gameMusic.play();
 
-        InputMultiplexer im = new InputMultiplexer(gui, playerController, new GestureDetector(playerController));
+        InputMultiplexer im = new InputMultiplexer(gui, playerController, new GestureDetector(playerController), fpsController);
         Gdx.input.setInputProcessor(im);
     }
 

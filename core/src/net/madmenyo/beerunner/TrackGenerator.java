@@ -7,12 +7,15 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelCache;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.SphereShapeBuilder;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,6 +113,12 @@ public class TrackGenerator {
 
         nextSection.setSideObjectCache(modelCache);
 
+
+        Array<Renderable> tmp = new Array();
+
+        modelCache.getRenderables(tmp, Pools.get(Renderable.class));
+
+        System.out.println("Cache size: " + tmp.size);
         return 0f;
     }
 

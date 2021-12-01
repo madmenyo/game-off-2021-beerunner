@@ -9,11 +9,15 @@ import net.madmenyo.beerunner.BeeRunner;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 
-		PackGui();
+		//PackGui();
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1280;
 		config.height = 720;
+
+		config.foregroundFPS = 0;
+		config.backgroundFPS = 0;
+		config.vSyncEnabled = false;
 
 		config.forceExit = false;
 		new LwjglApplication(new BeeRunner(), config);

@@ -14,6 +14,7 @@ public class ProfilerOverlay extends Table {
     private Label glCallsLabel;
     private Label glSwitches;
     private Label glBindsLabel;
+    private Label glDrawCalls;
 
     private boolean profiling= true;
 
@@ -24,6 +25,7 @@ public class ProfilerOverlay extends Table {
         glCallsLabel = new Label("", skin);
         glSwitches = new Label("", skin);
         glBindsLabel = new Label("", skin);
+        glDrawCalls = new Label("", skin);
 
         profiler = new GLProfiler(Gdx.graphics);
         profiler.enable();
@@ -41,6 +43,8 @@ public class ProfilerOverlay extends Table {
         add(glSwitches).row();
         add("GL Binds");
         add(glBindsLabel).row();
+        add("GL Drawcalls");
+        add(glDrawCalls).row();
     }
 
     @Override
@@ -51,6 +55,7 @@ public class ProfilerOverlay extends Table {
         glBindsLabel.setText(profiler.getTextureBindings());
         glSwitches.setText(profiler.getShaderSwitches());
         glCallsLabel.setText(profiler.getCalls());
+        glDrawCalls.setText(profiler.getDrawCalls());
 
         profiler.reset();
     }
